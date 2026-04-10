@@ -154,7 +154,10 @@
                     </div>
                 </fieldset>
 
-                <button type="submit" class="btn submit" style="margin-top: 0;">Save Notifications</button>
+                <div style="display: flex; gap: 10px; margin-top: 0;">
+                    <button type="submit" class="btn submit" style="margin-top: 0; flex: 1;">Save Notifications</button>
+                    <button type="button" id="testNotifyBtn" class="btn primary" style="margin-top: 0; flex: 1; background: #3b82f6;">Test Webhooks</button>
+                </div>
                 <div id="notifySaveMsg" class="success-msg hidden">Saved Successfully!</div>
             </form>
         </section>

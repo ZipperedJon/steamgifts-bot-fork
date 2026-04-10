@@ -87,6 +87,39 @@ document.addEventListener("DOMContentLoaded", () => {
     if (uiConfigForm) uiConfigForm.addEventListener('submit', (e) => saveConfig(e, uiSaveMsg));
     if (notifyConfigForm) notifyConfigForm.addEventListener('submit', (e) => saveConfig(e, notifySaveMsg));
 
+    const testNotifyBtn = document.getElementById('testNotifyBtn');
+    if (testNotifyBtn) {
+        testNotifyBtn.addEventListener('click', () => {
+            const config = {
+                discord_webhook: document.getElementById('discord_webhook').value,
+                telegram_token: document.getElementById('telegram_token').value,
+                telegram_chat_id: document.getElementById('telegram_chat_id').value,
+                n8n_webhook: document.getElementById('n8n_webhook').value
+            };
+            
+            const originalText = testNotifyBtn.textContent;
+            testNotifyBtn.textContent = 'Testing...';
+            testNotifyBtn.disabled = true;
+            
+            fetch('/api/test_notification', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(config)
+            })
+            .then(res => res.json())
+            .then(data => {
+                testNotifyBtn.textContent = originalText;
+                testNotifyBtn.disabled = false;
+                alert(data.message);
+            })
+            .catch(err => {
+                testNotifyBtn.textContent = originalText;
+                testNotifyBtn.disabled = false;
+                alert('Error dispatching test notification.');
+            });
+        });
+    }
+
     // Bot Control
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');

@@ -3,6 +3,7 @@ import threading
 import json
 import os
 import time
+import apprise
 
 from src.main import SteamGifts
 from src.logger import web_logger, log
@@ -62,6 +63,40 @@ def handle_config():
         return jsonify({"status": "success", "config": data})
     else:
         return jsonify(load_config())
+
+@app.route('/api/test_notification', methods=['POST'])
+def test_notification():
+    data = request.json
+    
+    urls = []
+    if data.get("discord_webhook"):
+        urls.append(data.get("discord_webhook"))
+    if data.get("telegram_token") and data.get("telegram_chat_id"):
+        urls.append(f"tgram://{data.get('telegram_token')}/{data.get('telegram_chat_id')}")
+    if data.get("n8n_webhook"):
+        n8n = data.get("n8n_webhook")
+        if n8n.startswith("http://"): n8n = "json://" + n8n[7:]
+        elif n8n.startswith("https://"): n8n = "jsons://" + n8n[8:]
+        urls.append(n8n)
+        
+    if not urls:
+        return jsonify({"status": "error", "message": "No valid webhooks provided."})
+        
+    ap = apprise.Apprise()
+    for url in urls:
+        ap.add(url)
+        
+    try:
+        success = ap.notify(
+            body="This is a test notification from your SteamGifts Bot! 🚀",
+            title="SG Bot: Test Successful! 🎉"
+        )
+        if success:
+            return jsonify({"status": "success", "message": "Test notifications transmitted successfully!"})
+        else:
+            return jsonify({"status": "error", "message": "Failed to push to one or more configured services."})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
