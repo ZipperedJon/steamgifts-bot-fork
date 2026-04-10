@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SteamGifts Bot Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h2>SG Bot</h2>
+            <div class="status-badge offline" id="botStatus">Offline</div>
+        </div>
+        <nav>
+            <a href="#" class="nav-item active" data-tab="settings">Settings</a>
+            <a href="#" class="nav-item" data-tab="logs">Logs</a>
+            <a href="#" class="nav-item" data-tab="history">History</a>
+        </nav>
+        <div class="controls">
+            <button id="startBtn" class="btn primary">Start Bot</button>
+            <button id="stopBtn" class="btn danger" style="display: none;">Stop Bot</button>
+        </div>
+    </div>
+
+    <main class="content">
+        <!-- Settings Tab -->
+        <section id="settings" class="tab-pane active">
+            <header>
+                <h1>Configuration</h1>
+                <p>Manage your account settings and bot behavior.</p>
+            </header>
+            <form id="configForm" class="glass-form">
+                <div class="form-group">
+                    <label for="cookie">PHPSESSID Cookie</label>
+                    <input type="password" id="cookie" name="cookie" required placeholder="Enter your PHPSESSID">
+                </div>
+                <div class="form-group row">
+                    <div class="col">
+                        <label for="gift_type">Gift Type</label>
+                        <select id="gift_type" name="gift_type">
+                            <option value="All">All</option>
+                            <option value="Wishlist">Wishlist</option>
+                            <option value="Recommended">Recommended</option>
+                            <option value="Copies">Copies</option>
+                            <option value="DLC">DLC</option>
+                            <option value="New">New</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="min_points">Minimum Points</label>
+                        <input type="number" id="min_points" name="min_points" min="1" value="10">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col">
+                        <label for="sleep_low_points">Sleep Time (Low Points) [sec]</label>
+                        <input type="number" id="sleep_low_points" name="sleep_low_points" min="1" value="900">
+                    </div>
+                    <div class="col">
+                        <label for="sleep_list_ended">Sleep Time (List Ended) [sec]</label>
+                        <input type="number" id="sleep_list_ended" name="sleep_list_ended" min="1" value="120">
+                    </div>
+                </div>
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="pinned" name="pinned">
+                    <label for="pinned">Enter pinned games?</label>
+                </div>
+                <button type="submit" class="btn submit">Save Configuration</button>
+                <div id="saveMsg" class="success-msg hidden">Saved Successfully!</div>
+            </form>
+        </section>
+
+        <!-- Logs Tab -->
+        <section id="logs" class="tab-pane">
+            <header>
+                <h1>Real-Time Logs</h1>
+                <p>Monitor the bot's activity feed.</p>
+            </header>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="terminal-body" id="logContainer">
+                    <!-- Logs go here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- History Tab -->
+        <section id="history" class="tab-pane">
+            <header>
+                <h1>Entered Giveaways</h1>
+                <p>Detailed history of successful entries.</p>
+            </header>
+            <div class="table-container fade-in">
+                <table id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Game Name</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <!-- History goes here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

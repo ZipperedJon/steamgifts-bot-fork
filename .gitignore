@@ -1,0 +1,9 @@
+# Logs and Data
+data/
+config.json
+history.json
+*.log
+
+# Python
+__pycache__/
+*.pyc
