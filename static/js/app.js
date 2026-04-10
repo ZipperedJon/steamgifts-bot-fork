@@ -31,8 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Form Handling
     const configForm = document.getElementById('configForm');
     const uiConfigForm = document.getElementById('uiConfigForm');
+    const notifyConfigForm = document.getElementById('notifyConfigForm');
     const saveMsg = document.getElementById('saveMsg');
     const uiSaveMsg = document.getElementById('uiSaveMsg');
+    const notifySaveMsg = document.getElementById('notifySaveMsg');
     
     window.currentDateFormat = 'US';
     // Load config
@@ -48,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('date_format').value = data.date_format;
                 window.currentDateFormat = data.date_format;
             }
+            if(data.webhook_url) document.getElementById('webhook_url').value = data.webhook_url;
             if(data.pinned) document.getElementById('pinned').checked = data.pinned;
         });
 
@@ -60,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
             sleep_low_points: parseInt(document.getElementById('sleep_low_points').value) || 900,
             sleep_list_ended: parseInt(document.getElementById('sleep_list_ended').value) || 120,
             date_format: document.getElementById('date_format').value,
+            webhook_url: document.getElementById('webhook_url').value,
             pinned: document.getElementById('pinned').checked
         };
         window.currentDateFormat = config.date_format;
@@ -75,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     configForm.addEventListener('submit', (e) => saveConfig(e, saveMsg));
     if (uiConfigForm) uiConfigForm.addEventListener('submit', (e) => saveConfig(e, uiSaveMsg));
+    if (notifyConfigForm) notifyConfigForm.addEventListener('submit', (e) => saveConfig(e, notifySaveMsg));
 
     // Bot Control
     const startBtn = document.getElementById('startBtn');
@@ -198,10 +203,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 data.slice().reverse().forEach(entry => {
                     const tr = document.createElement('tr');
                     const linkMarkup = entry.link ? `<a href="${entry.link}" target="_blank" style="color: #60a5fa; text-decoration: none;">${entry.name}</a>` : entry.name;
+                    const imageMarkup = entry.image ? `<img src="${entry.image}" style="width: 120px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-right: 15px; float: left;">` : '';
                     tr.innerHTML = `
                         <td>${formatDateString(entry.date)}</td>
-                        <td style="font-weight: 600">${linkMarkup}</td>
-                        <td><span class="cost-badge">${entry.cost} P</span></td>
+                        <td style="font-weight: 600; vertical-align: middle;">${imageMarkup} <div style="display:flex; flex-direction:column; justify-content:center; min-height: 45px;">${linkMarkup}</div></td>
+                        <td style="vertical-align: middle;"><span class="cost-badge">${entry.cost} P</span></td>
                     `;
                     tbody.appendChild(tr);
                 });

@@ -29,17 +29,18 @@ def load_config():
         "min_points": 10,
         "sleep_low_points": 900,
         "sleep_list_ended": 120,
-        "date_format": "US"
+        "date_format": "US",
+        "webhook_url": ""
     }
 
 def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f, indent=4)
 
-def run_bot(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended):
+def run_bot(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url):
     global bot_instance
     try:
-        bot_instance = SteamGifts(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended)
+        bot_instance = SteamGifts(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url)
         bot_instance.start()
     except Exception as e:
         log(f"Bot error: {str(e)}", "red")
@@ -77,7 +78,7 @@ def start_bot():
 
     bot_thread = threading.Thread(
         target=run_bot, 
-        args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120))
+        args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), config.get('webhook_url', ''))
     )
     bot_thread.daemon = True
     bot_thread.start()

@@ -4,6 +4,8 @@ import requests
 import json
 import threading
 import os
+import re
+import apprise
 
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
@@ -16,7 +18,7 @@ from datetime import datetime
 from src.logger import log
 
 class SteamGifts:
-    def __init__(self, cookie, gifts_type, pinned, min_points, sleep_low_points=900, sleep_list_ended=120):
+    def __init__(self, cookie, gifts_type, pinned, min_points, sleep_low_points=900, sleep_list_ended=120, webhook_url=""):
         self.cookie = {
             'PHPSESSID': cookie
         }
@@ -42,6 +44,13 @@ class SteamGifts:
         }
         self.running = False
         self.history_file = "data/history.json"
+        
+        self.ap = apprise.Apprise()
+        if webhook_url:
+            for url in webhook_url.split(','):
+                url = url.strip()
+                if url:
+                    self.ap.add(url)
 
     def requests_retry_session(
         self,
@@ -87,7 +96,7 @@ class SteamGifts:
             sleep(sleep_interval)
             elapsed += sleep_interval
 
-    def record_history(self, game_name, game_cost, game_link):
+    def record_history(self, game_name, game_cost, game_link, image_url):
         history = []
         if os.path.exists(self.history_file):
             try:
@@ -100,6 +109,7 @@ class SteamGifts:
             "name": game_name,
             "cost": game_cost,
             "link": game_link,
+            "image": image_url,
             "date": datetime.now().isoformat()
         })
 
@@ -158,12 +168,29 @@ class SteamGifts:
                     game_href = item.find('a', {'class': 'giveaway__heading__name'})['href']
                     game_id = game_href.split('/')[2]
                     game_link = self.base + game_href
+
+                    # Extract image
+                    image_url = ""
+                    img_match = re.search(r'url\((https?://[^)]+)\)', str(item))
+                    if img_match:
+                        image_url = img_match.group(1)
+
                     res = self.entry_gift(game_id)
                     if res:
                         self.points -= int(game_cost)
                         txt = f"🎉 One more game! Has just entered {game_name}"
                         log(txt, "green")
-                        self.record_history(game_name, int(game_cost), game_link)
+                        self.record_history(game_name, int(game_cost), game_link, image_url)
+                        
+                        try:
+                            if len(self.ap):
+                                self.ap.notify(
+                                    body=f"Successfully entered **{game_name}** ({game_cost} P)\n{game_link}",
+                                    title="SG Bot: Giveaway Entered! 🎉"
+                                )
+                        except Exception as e:
+                            log(f"Webhook error: {str(e)}", "red")
+
                         self.sleep_with_check(randint(3, 7))
 
             n = n+1

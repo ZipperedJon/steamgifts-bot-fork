@@ -16,6 +16,7 @@
         <nav>
             <a href="#" class="nav-item active" data-tab="settings">Bot Settings</a>
             <a href="#" class="nav-item" data-tab="ui-settings">WebUI Settings</a>
+            <a href="#" class="nav-item" data-tab="notifications">Notifications</a>
             <a href="#" class="nav-item" data-tab="logs">Logs</a>
             <a href="#" class="nav-item" data-tab="history">History</a>
         </nav>
@@ -101,6 +102,23 @@
                 </fieldset>
                 <button type="submit" class="btn submit">Save UI Settings</button>
                 <div id="uiSaveMsg" class="success-msg hidden">Saved Successfully!</div>
+            </form>
+        </section>
+
+        <!-- Notifications Tab -->
+        <section id="notifications" class="tab-pane">
+            <header>
+                <h1>Notifications Config</h1>
+                <p>Register external webhooks to fire upon successful giveaway entries.</p>
+            </header>
+            <form id="notifyConfigForm" class="glass-form">
+                <div class="form-group">
+                    <label for="webhook_url">Webhook Apprise URLs (Comma Separated)</label>
+                    <input type="text" id="webhook_url" name="webhook_url" placeholder="discord://token, tgram://token/id, json://n8n-ip">
+                    <small style="color: var(--text-muted); margin-top: 8px; font-size: 0.85rem; line-height: 1.4;">Powered natively by <a href="https://github.com/caronc/apprise" target="_blank" style="color:var(--primary-color); text-decoration: none;">Apprise</a>. Separate multiple webhook URLs with commas.</small>
+                </div>
+                <button type="submit" class="btn submit">Save Webhooks</button>
+                <div id="notifySaveMsg" class="success-msg hidden">Saved Successfully!</div>
             </form>
         </section>
 
