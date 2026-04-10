@@ -28,7 +28,8 @@ def load_config():
         "pinned": False,
         "min_points": 10,
         "sleep_low_points": 900,
-        "sleep_list_ended": 120
+        "sleep_list_ended": 120,
+        "date_format": "US"
     }
 
 def save_config(config):
@@ -61,7 +62,8 @@ def handle_config():
 @app.route('/api/status', methods=['GET'])
 def get_status():
     is_running = bot_thread is not None and bot_thread.is_alive()
-    return jsonify({"running": is_running})
+    points = bot_instance.points if bot_instance and hasattr(bot_instance, 'points') else 0
+    return jsonify({"running": is_running, "points": points})
 
 @app.route('/api/start', methods=['POST'])
 def start_bot():

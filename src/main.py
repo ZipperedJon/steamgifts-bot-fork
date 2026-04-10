@@ -87,7 +87,7 @@ class SteamGifts:
             sleep(sleep_interval)
             elapsed += sleep_interval
 
-    def record_history(self, game_name, game_cost):
+    def record_history(self, game_name, game_cost, game_link):
         history = []
         if os.path.exists(self.history_file):
             try:
@@ -99,7 +99,8 @@ class SteamGifts:
         history.append({
             "name": game_name,
             "cost": game_cost,
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "link": game_link,
+            "date": datetime.now().isoformat()
         })
 
         with open(self.history_file, 'w', encoding='utf-8') as f:
@@ -154,13 +155,15 @@ class SteamGifts:
                     continue
 
                 elif self.points - int(game_cost) >= 0:
-                    game_id = item.find('a', {'class': 'giveaway__heading__name'})['href'].split('/')[2]
+                    game_href = item.find('a', {'class': 'giveaway__heading__name'})['href']
+                    game_id = game_href.split('/')[2]
+                    game_link = self.base + game_href
                     res = self.entry_gift(game_id)
                     if res:
                         self.points -= int(game_cost)
                         txt = f"🎉 One more game! Has just entered {game_name}"
                         log(txt, "green")
-                        self.record_history(game_name, int(game_cost))
+                        self.record_history(game_name, int(game_cost), game_link)
                         self.sleep_with_check(randint(3, 7))
 
             n = n+1

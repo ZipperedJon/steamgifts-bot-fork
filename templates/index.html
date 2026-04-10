@@ -12,6 +12,7 @@
         <div class="logo">
             <h2>SG Bot</h2>
             <div class="status-badge offline" id="botStatus">Offline</div>
+            <div class="points-badge" id="botPoints" style="display: none; margin-top: 10px; font-weight: 600; padding: 6px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.9em; text-align: center;">Points: <span id="pointsValue">0</span></div>
         </div>
         <nav>
             <a href="#" class="nav-item active" data-tab="settings">Settings</a>
@@ -63,9 +64,19 @@
                         <input type="number" id="sleep_list_ended" name="sleep_list_ended" min="1" value="120">
                     </div>
                 </div>
-                <div class="form-group checkbox">
-                    <input type="checkbox" id="pinned" name="pinned">
-                    <label for="pinned">Enter pinned games?</label>
+                <div class="form-group row">
+                    <div class="col checkbox">
+                        <input type="checkbox" id="pinned" name="pinned">
+                        <label for="pinned">Enter pinned games?</label>
+                    </div>
+                    <div class="col">
+                        <label for="date_format">Date Format (History)</label>
+                        <select id="date_format" name="date_format">
+                            <option value="US">MM-DD-YYYY, 12-Hour (AM/PM)</option>
+                            <option value="EU">DD-MM-YYYY, 24-Hour</option>
+                            <option value="ISO">YYYY-MM-DD HH:mm:ss</option>
+                        </select>
+                    </div>
                 </div>
                 <button type="submit" class="btn submit">Save Configuration</button>
                 <div id="saveMsg" class="success-msg hidden">Saved Successfully!</div>

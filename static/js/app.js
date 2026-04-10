@@ -15,16 +15,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 pane.classList.remove('active');
                 if(pane.id === target) {
                     pane.classList.add('active');
+                    window.location.hash = '#' + target;
                     if(target === 'history') loadHistory();
                 }
             });
         });
     });
 
+    // Hash Load handling
+    const initialHash = window.location.hash.substring(1);
+    if(initialHash) {
+        document.querySelector(`.nav-item[data-tab="${initialHash}"]`)?.click();
+    }
+
     // Form Handling
     const configForm = document.getElementById('configForm');
     const saveMsg = document.getElementById('saveMsg');
     
+    window.currentDateFormat = 'US';
     // Load config
     fetch('/api/config')
         .then(r => r.json())
@@ -34,6 +42,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if(data.min_points) document.getElementById('min_points').value = data.min_points;
             if(data.sleep_low_points) document.getElementById('sleep_low_points').value = data.sleep_low_points;
             if(data.sleep_list_ended) document.getElementById('sleep_list_ended').value = data.sleep_list_ended;
+            if(data.date_format) {
+                document.getElementById('date_format').value = data.date_format;
+                window.currentDateFormat = data.date_format;
+            }
             if(data.pinned) document.getElementById('pinned').checked = data.pinned;
         });
 
@@ -45,8 +57,10 @@ document.addEventListener("DOMContentLoaded", () => {
             min_points: parseInt(document.getElementById('min_points').value) || 10,
             sleep_low_points: parseInt(document.getElementById('sleep_low_points').value) || 900,
             sleep_list_ended: parseInt(document.getElementById('sleep_list_ended').value) || 120,
+            date_format: document.getElementById('date_format').value,
             pinned: document.getElementById('pinned').checked
         };
+        window.currentDateFormat = config.date_format;
         fetch('/api/config', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -76,10 +90,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    const pointsBadge = document.getElementById('botPoints');
+    const pointsValue = document.getElementById('pointsValue');
+
     function checkStatus() {
         fetch('/api/status')
             .then(r => r.json())
-            .then(data => updateStatus(data.running));
+            .then(data => {
+                updateStatus(data.running);
+                if (data.running) {
+                    pointsBadge.style.display = 'block';
+                    pointsValue.textContent = data.points || 0;
+                } else {
+                    pointsBadge.style.display = 'none';
+                }
+            });
     }
 
     setInterval(checkStatus, 3000);
@@ -136,6 +161,27 @@ document.addEventListener("DOMContentLoaded", () => {
         logContainer.scrollTop = logContainer.scrollHeight;
     };
 
+    // format date string helper
+    function formatDateString(dateStr) {
+        if(!dateStr) return '';
+        try {
+            const d = new Date(dateStr);
+            if(isNaN(d)) return dateStr;
+            const fmt = window.currentDateFormat;
+            if(fmt === 'US') {
+                return d.toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true});
+            } else if(fmt === 'EU') {
+                return d.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false});
+            } else {
+                // ISO
+                const pad = n => n.toString().padStart(2, '0');
+                return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            }
+        } catch(e) {
+            return dateStr;
+        }
+    }
+
     // History lazy load
     function loadHistory() {
         fetch('/api/history')
@@ -146,9 +192,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Reverse to show newest first
                 data.slice().reverse().forEach(entry => {
                     const tr = document.createElement('tr');
+                    const linkMarkup = entry.link ? `<a href="${entry.link}" target="_blank" style="color: #60a5fa; text-decoration: none;">${entry.name}</a>` : entry.name;
                     tr.innerHTML = `
-                        <td>${entry.date}</td>
-                        <td style="font-weight: 600">${entry.name}</td>
+                        <td>${formatDateString(entry.date)}</td>
+                        <td style="font-weight: 600">${linkMarkup}</td>
                         <td><span class="cost-badge">${entry.cost} P</span></td>
                     `;
                     tbody.appendChild(tr);
