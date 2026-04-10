@@ -30,7 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Form Handling
     const configForm = document.getElementById('configForm');
+    const uiConfigForm = document.getElementById('uiConfigForm');
     const saveMsg = document.getElementById('saveMsg');
+    const uiSaveMsg = document.getElementById('uiSaveMsg');
     
     window.currentDateFormat = 'US';
     // Load config
@@ -49,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if(data.pinned) document.getElementById('pinned').checked = data.pinned;
         });
 
-    configForm.addEventListener('submit', (e) => {
+    function saveConfig(e, msgElement) {
         e.preventDefault();
         const config = {
             cookie: document.getElementById('cookie').value,
@@ -66,10 +68,13 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(config)
         }).then(() => {
-            saveMsg.classList.remove('hidden');
-            setTimeout(() => saveMsg.classList.add('hidden'), 3000);
+            msgElement.classList.remove('hidden');
+            setTimeout(() => msgElement.classList.add('hidden'), 3000);
         });
-    });
+    }
+
+    configForm.addEventListener('submit', (e) => saveConfig(e, saveMsg));
+    if (uiConfigForm) uiConfigForm.addEventListener('submit', (e) => saveConfig(e, uiSaveMsg));
 
     // Bot Control
     const startBtn = document.getElementById('startBtn');

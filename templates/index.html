@@ -12,10 +12,10 @@
         <div class="logo">
             <h2>SG Bot</h2>
             <div class="status-badge offline" id="botStatus">Offline</div>
-            <div class="points-badge" id="botPoints" style="display: none; margin-top: 10px; font-weight: 600; padding: 6px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.9em; text-align: center;">Points: <span id="pointsValue">0</span></div>
         </div>
         <nav>
-            <a href="#" class="nav-item active" data-tab="settings">Settings</a>
+            <a href="#" class="nav-item active" data-tab="settings">Bot Settings</a>
+            <a href="#" class="nav-item" data-tab="ui-settings">WebUI Settings</a>
             <a href="#" class="nav-item" data-tab="logs">Logs</a>
             <a href="#" class="nav-item" data-tab="history">History</a>
         </nav>
@@ -26,10 +26,16 @@
     </div>
 
     <main class="content">
-        <!-- Settings Tab -->
+        <div class="top-bar" style="position: absolute; top: 2rem; right: 3rem; z-index: 10;">
+            <div class="points-badge" id="botPoints" style="display: none; padding: 8px 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 999px; backdrop-filter: blur(12px); font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(0,0,0,0.2);">
+                <span style="color: var(--text-muted); margin-right: 5px;">Wallet:</span> <span id="pointsValue" style="color: var(--primary-color);">0</span> P
+            </div>
+        </div>
+
+        <!-- Bot Settings Tab -->
         <section id="settings" class="tab-pane active">
             <header>
-                <h1>Configuration</h1>
+                <h1>Bot Configuration</h1>
                 <p>Manage your account settings and bot behavior.</p>
             </header>
             <form id="configForm" class="glass-form">
@@ -64,11 +70,23 @@
                         <input type="number" id="sleep_list_ended" name="sleep_list_ended" min="1" value="120">
                     </div>
                 </div>
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="pinned" name="pinned">
+                    <label for="pinned">Enter pinned games?</label>
+                </div>
+                <button type="submit" class="btn submit">Save Configuration</button>
+                <div id="saveMsg" class="success-msg hidden">Saved Successfully!</div>
+            </form>
+        </section>
+
+        <!-- WebUI Settings Tab -->
+        <section id="ui-settings" class="tab-pane">
+            <header>
+                <h1>WebUI Settings</h1>
+                <p>Customize how the dashboard looks and behaves.</p>
+            </header>
+            <form id="uiConfigForm" class="glass-form">
                 <div class="form-group row">
-                    <div class="col checkbox">
-                        <input type="checkbox" id="pinned" name="pinned">
-                        <label for="pinned">Enter pinned games?</label>
-                    </div>
                     <div class="col">
                         <label for="date_format">Date Format (History)</label>
                         <select id="date_format" name="date_format">
@@ -78,8 +96,8 @@
                         </select>
                     </div>
                 </div>
-                <button type="submit" class="btn submit">Save Configuration</button>
-                <div id="saveMsg" class="success-msg hidden">Saved Successfully!</div>
+                <button type="submit" class="btn submit">Save UI Settings</button>
+                <div id="uiSaveMsg" class="success-msg hidden">Saved Successfully!</div>
             </form>
         </section>
 
