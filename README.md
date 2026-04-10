@@ -31,7 +31,7 @@ services:
     image: ghcr.io/zipperedjon/steamgifts-bot-fork:latest
     container_name: steamgifts-bot
     ports:
-      - "1738:5000"
+      - "1738:1738"
     volumes:
       - ./data:/app/data
     restart: unless-stopped
