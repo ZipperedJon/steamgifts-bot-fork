@@ -50,7 +50,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('date_format').value = data.date_format;
                 window.currentDateFormat = data.date_format;
             }
-            if(data.webhook_url) document.getElementById('webhook_url').value = data.webhook_url;
+            if(data.discord_webhook) document.getElementById('discord_webhook').value = data.discord_webhook;
+            if(data.telegram_token) document.getElementById('telegram_token').value = data.telegram_token;
+            if(data.telegram_chat_id) document.getElementById('telegram_chat_id').value = data.telegram_chat_id;
+            if(data.n8n_webhook) document.getElementById('n8n_webhook').value = data.n8n_webhook;
             if(data.pinned) document.getElementById('pinned').checked = data.pinned;
         });
 
@@ -63,7 +66,10 @@ document.addEventListener("DOMContentLoaded", () => {
             sleep_low_points: parseInt(document.getElementById('sleep_low_points').value) || 900,
             sleep_list_ended: parseInt(document.getElementById('sleep_list_ended').value) || 120,
             date_format: document.getElementById('date_format').value,
-            webhook_url: document.getElementById('webhook_url').value,
+            discord_webhook: document.getElementById('discord_webhook').value,
+            telegram_token: document.getElementById('telegram_token').value,
+            telegram_chat_id: document.getElementById('telegram_chat_id').value,
+            n8n_webhook: document.getElementById('n8n_webhook').value,
             pinned: document.getElementById('pinned').checked
         };
         window.currentDateFormat = config.date_format;

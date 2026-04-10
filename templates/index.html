@@ -112,12 +112,37 @@
                 <p>Register external webhooks to fire upon successful giveaway entries.</p>
             </header>
             <form id="notifyConfigForm" class="glass-form">
-                <div class="form-group">
-                    <label for="webhook_url">Webhook Apprise URLs (Comma Separated)</label>
-                    <input type="text" id="webhook_url" name="webhook_url" placeholder="discord://token, tgram://token/id, json://n8n-ip">
-                    <small style="color: var(--text-muted); margin-top: 8px; font-size: 0.85rem; line-height: 1.4;">Powered natively by <a href="https://github.com/caronc/apprise" target="_blank" style="color:var(--primary-color); text-decoration: none;">Apprise</a>. Separate multiple webhook URLs with commas.</small>
-                </div>
-                <button type="submit" class="btn submit">Save Webhooks</button>
+                <fieldset style="border: none; margin-bottom: 1.5rem;">
+                    <legend style="font-weight: 700; font-size: 1.1rem; color: #8bb4f6; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Discord Webhook</legend>
+                    <div class="form-group">
+                        <label for="discord_webhook">Webhook URL</label>
+                        <input type="text" id="discord_webhook" name="discord_webhook" placeholder="https://discord.com/api/webhooks/...">
+                    </div>
+                </fieldset>
+
+                <fieldset style="border: none; margin-bottom: 1.5rem;">
+                    <legend style="font-weight: 700; font-size: 1.1rem; color: #0088cc; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Telegram Bot</legend>
+                    <div class="form-group row">
+                        <div class="col">
+                            <label for="telegram_token">Bot Token</label>
+                            <input type="text" id="telegram_token" name="telegram_token" placeholder="123456789:ABCDefghi...">
+                        </div>
+                        <div class="col">
+                            <label for="telegram_chat_id">Chat ID</label>
+                            <input type="text" id="telegram_chat_id" name="telegram_chat_id" placeholder="-1001234567">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset style="border: none; margin-bottom: 1.5rem;">
+                    <legend style="font-weight: 700; font-size: 1.1rem; color: #ff6d5a; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">n8n Automation</legend>
+                    <div class="form-group">
+                        <label for="n8n_webhook">Webhook URL</label>
+                        <input type="text" id="n8n_webhook" name="n8n_webhook" placeholder="https://n8n.your-domain.com/webhook/...">
+                    </div>
+                </fieldset>
+
+                <button type="submit" class="btn submit" style="margin-top: 0;">Save Notifications</button>
                 <div id="notifySaveMsg" class="success-msg hidden">Saved Successfully!</div>
             </form>
         </section>

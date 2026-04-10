@@ -30,7 +30,10 @@ def load_config():
         "sleep_low_points": 900,
         "sleep_list_ended": 120,
         "date_format": "US",
-        "webhook_url": ""
+        "discord_webhook": "",
+        "telegram_token": "",
+        "telegram_chat_id": "",
+        "n8n_webhook": ""
     }
 
 def save_config(config):
@@ -76,9 +79,20 @@ def start_bot():
     if not config.get('cookie'):
         return jsonify({"status": "error", "message": "No cookie (PHPSESSID) configured."})
 
+    urls = []
+    if config.get("discord_webhook"):
+        urls.append(config.get("discord_webhook"))
+    if config.get("telegram_token") and config.get("telegram_chat_id"):
+        urls.append(f"tgram://{config.get('telegram_token')}/{config.get('telegram_chat_id')}")
+    if config.get("n8n_webhook"):
+        n8n = config.get("n8n_webhook")
+        if n8n.startswith("http://"): n8n = "json://" + n8n[7:]
+        elif n8n.startswith("https://"): n8n = "jsons://" + n8n[8:]
+        urls.append(n8n)
+
     bot_thread = threading.Thread(
         target=run_bot, 
-        args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), config.get('webhook_url', ''))
+        args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), ','.join(urls))
     )
     bot_thread.daemon = True
     bot_thread.start()
