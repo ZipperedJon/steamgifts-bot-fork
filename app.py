@@ -88,7 +88,7 @@ def test_notification():
         "tts": False,
         "embeds": [
             {
-                "description": "",
+                "description": "Cost: **10 P**",
                 "fields": [],
                 "author": {
                     "name": "Steam Gifts Bot",

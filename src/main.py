@@ -116,7 +116,7 @@ class SteamGifts:
             "tts": False,
             "embeds": [
                 {
-                    "description": "",
+                    "description": f"Cost: **{game_cost} P**",
                     "fields": [],
                     "author": {
                         "name": "Steam Gifts Bot",
