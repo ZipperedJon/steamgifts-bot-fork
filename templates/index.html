@@ -182,9 +182,12 @@
 
         <!-- History Tab -->
         <section id="history" class="tab-pane">
-            <header>
-                <h1>Entered Giveaways</h1>
-                <p>Detailed history of successful entries.</p>
+            <header style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>Entered Giveaways</h1>
+                    <p>Detailed history of successful entries.</p>
+                </div>
+                <button id="clearHistoryBtn" class="btn danger" style="background: #ef4444;">Clear History</button>
             </header>
             <div class="table-container fade-in">
                 <table id="historyTable">

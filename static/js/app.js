@@ -252,4 +252,47 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
     }
+
+    // Clear history button with 3-sec timer
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    if (clearHistoryBtn) {
+        let clearTimer = null;
+        let countdown = 3;
+        clearHistoryBtn.addEventListener('click', () => {
+            if (countdown > 0) {
+                if (clearTimer) return; // already counting
+                clearHistoryBtn.textContent = `Confirm Purge (${countdown})`;
+                clearTimer = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        clearHistoryBtn.textContent = `Confirm Purge (${countdown})`;
+                    } else {
+                        clearInterval(clearTimer);
+                        clearHistoryBtn.textContent = `Delete Now`;
+                        clearHistoryBtn.style.background = '#b91c1c'; // darker red
+                    }
+                }, 1000);
+            } else {
+                clearHistoryBtn.disabled = true;
+                clearHistoryBtn.textContent = `Clearing...`;
+                fetch('/api/history', { method: 'DELETE' })
+                    .then(r => r.json())
+                    .then(r => {
+                        loadHistory();
+                        clearHistoryBtn.disabled = false;
+                        clearHistoryBtn.textContent = `Clear History`;
+                        clearHistoryBtn.style.background = '#ef4444';
+                        countdown = 3;
+                        clearTimer = null;
+                    })
+                    .catch(e => {
+                        clearHistoryBtn.disabled = false;
+                        clearHistoryBtn.textContent = `Clear History`;
+                        clearHistoryBtn.style.background = '#ef4444';
+                        countdown = 3;
+                        clearTimer = null;
+                    });
+            }
+        });
+    }
 });

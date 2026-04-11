@@ -3,7 +3,7 @@ import threading
 import json
 import os
 import time
-import apprise
+import requests
 
 from src.main import SteamGifts
 from src.logger import web_logger, log
@@ -81,23 +81,60 @@ def test_notification():
         
     if not urls:
         return jsonify({"status": "error", "message": "No valid webhooks provided."})
-        
-    ap = apprise.Apprise()
-    for url in urls:
-        ap.add(url)
-        
+      
+    image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW9I42jCj0xWN8ZhM_uEGT08icJv0OUD5Wsg&s"
+    payload = {
+        "content": "",
+        "tts": False,
+        "embeds": [
+            {
+                "description": "",
+                "fields": [],
+                "author": {
+                    "name": "Steam Gifts Bot",
+                    "icon_url": image_url
+                },
+                "title": f"Giveaway Entered: TEST GAME NAME",
+                "url": "https://steamgifts.com/",
+                "image": {
+                    "url": image_url
+                },
+                "thumbnail": {
+                    "url": image_url
+                }
+            }
+        ],
+        "components": [],
+        "actions": {},
+        "flags": 0,
+        "username": "Steam Gifts Bot",
+        "avatar_url": image_url
+    }
+    
     try:
-        success = ap.notify(
-            body="This is a test notification from your SteamGifts Bot! 🚀",
-            title="SG Bot: Test Successful! 🎉"
-        )
-        if success:
-            return jsonify({"status": "success", "message": "Test notifications transmitted successfully!"})
-        else:
-            return jsonify({"status": "error", "message": "Failed to push to one or more configured services."})
+        for url in urls:
+            if url.startswith('tgram://'):
+                parts = url.split('/')
+                token = parts[2]
+                chat_id = parts[3]
+                txt = f"🎉 Successfully entered **TEST GAME NAME** (10 P)\nhttps://steamgifts.com/"
+                requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={"chat_id": chat_id, "text": txt, "parse_mode": "Markdown"})
+            else: 
+                requests.post(url.replace('json://', 'http://').replace('jsons://', 'https://'), json=payload)
+                
+        return jsonify({"status": "success", "message": "Test notifications transmitted successfully!"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
+@app.route('/api/history', methods=['DELETE'])
+def clear_history():
+    try:
+        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump([], f)
+        return jsonify({"status": "success", "message": "History cleared."})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+        
 @app.route('/api/status', methods=['GET'])
 def get_status():
     is_running = bot_thread is not None and bot_thread.is_alive()

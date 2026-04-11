@@ -5,7 +5,6 @@ import json
 import threading
 import os
 import re
-import apprise
 
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
@@ -45,12 +44,7 @@ class SteamGifts:
         self.running = False
         self.history_file = "data/history.json"
         
-        self.ap = apprise.Apprise()
-        if webhook_url:
-            for url in webhook_url.split(','):
-                url = url.strip()
-                if url:
-                    self.ap.add(url)
+        self.webhook_urls = [u.strip() for u in webhook_url.split(',')] if webhook_url else []
 
     def requests_retry_session(
         self,
@@ -116,6 +110,50 @@ class SteamGifts:
         with open(self.history_file, 'w', encoding='utf-8') as f:
             json.dump(history, f, ensure_ascii=False, indent=4)
 
+    def dispatch_webhooks(self, game_name, game_cost, game_link, image_url):
+        payload = {
+            "content": "",
+            "tts": False,
+            "embeds": [
+                {
+                    "description": "",
+                    "fields": [],
+                    "author": {
+                        "name": "Steam Gifts Bot",
+                        "icon_url": image_url if image_url else ""
+                    },
+                    "title": f"Giveaway Entered: {game_name}",
+                    "url": game_link,
+                    "image": {
+                        "url": image_url if image_url else ""
+                    },
+                    "thumbnail": {
+                        "url": image_url if image_url else ""
+                    }
+                }
+            ],
+            "components": [],
+            "actions": {},
+            "flags": 0,
+            "username": "Steam Gifts Bot",
+            "avatar_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW9I42jCj0xWN8ZhM_uEGT08icJv0OUD5Wsg&s"
+        }
+
+        for url in self.webhook_urls:
+            try:
+                if url.startswith('tgram://'):
+                    parts = url.split('/')
+                    token = parts[2]
+                    chat_id = parts[3]
+                    txt = f"🎉 Successfully entered **{game_name}** ({game_cost} P)\n{game_link}"
+                    requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={"chat_id": chat_id, "text": txt, "parse_mode": "Markdown"})
+                elif url.startswith('discord://'):
+                    pass # Handled below
+                else: 
+                    requests.post(url.replace('json://', 'http://').replace('jsons://', 'https://'), json=payload)
+            except Exception as e:
+                log(f"Dispatch error for {url}: {str(e)}", "red")
+
     def get_game_content(self, page=1):
         n = page
         while self.running:
@@ -171,7 +209,7 @@ class SteamGifts:
 
                     # Extract image
                     image_url = ""
-                    img_match = re.search(r'url\((https?://[^)]+)\)', str(item))
+                    img_match = re.search(r'url\((https?://[^)]+/(?:apps|subs)/[^)]+)\)', str(item))
                     if img_match:
                         image_url = img_match.group(1)
 
@@ -183,11 +221,7 @@ class SteamGifts:
                         self.record_history(game_name, int(game_cost), game_link, image_url)
                         
                         try:
-                            if len(self.ap):
-                                self.ap.notify(
-                                    body=f"Successfully entered **{game_name}** ({game_cost} P)\n{game_link}",
-                                    title="SG Bot: Giveaway Entered! 🎉"
-                                )
+                            self.dispatch_webhooks(game_name, game_cost, game_link, image_url)
                         except Exception as e:
                             log(f"Webhook error: {str(e)}", "red")
 
