@@ -63,9 +63,9 @@
                             </select>
                         </div>
                         <div class="col" style="flex: 1; justify-content: flex-end; padding-bottom: 0.8rem;">
-                            <div class="form-group checkbox" style="margin-bottom: 0;">
-                                <input type="checkbox" id="pinned" name="pinned">
-                                <label for="pinned" style="margin-bottom: 0;">Enter pinned games?</label>
+                            <div style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; margin-bottom: 0;">
+                                <input type="checkbox" id="pinned" name="pinned" style="width: 20px; height: 20px; accent-color: var(--primary-color); cursor: pointer; margin: 0;">
+                                <label for="pinned" style="margin-bottom: 0; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">Enter pinned games?</label>
                             </div>
                         </div>
                     </div>
@@ -73,16 +73,16 @@
 
                 <fieldset style="border: none; margin-bottom: 1.5rem;">
                     <legend style="font-weight: 700; font-size: 1.1rem; color: #3b82f6; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Automation Timing</legend>
-                    <div class="form-group row" style="margin-top: 15px;">
-                        <div class="col">
+                    <div class="form-group row" style="margin-top: 15px; flex-wrap: wrap; gap: 1rem;">
+                        <div class="col" style="min-width: 120px;">
                             <label for="min_points">Minimum Points</label>
                             <input type="number" id="min_points" name="min_points" min="1" value="10">
                         </div>
-                        <div class="col">
+                        <div class="col" style="min-width: 120px;">
                             <label for="sleep_low_points">Sleep (No Pts) [s]</label>
                             <input type="number" id="sleep_low_points" name="sleep_low_points" min="1" value="900">
                         </div>
-                        <div class="col">
+                        <div class="col" style="min-width: 120px;">
                             <label for="sleep_list_ended">Sleep (No Gifts) [s]</label>
                             <input type="number" id="sleep_list_ended" name="sleep_list_ended" min="1" value="120">
                         </div>
