@@ -75,8 +75,8 @@ def test_notification():
         urls.append(f"tgram://{data.get('telegram_token')}/{data.get('telegram_chat_id')}")
     if data.get("n8n_webhook"):
         n8n = data.get("n8n_webhook")
-        if n8n.startswith("http://"): n8n = "json://" + n8n[7:]
-        elif n8n.startswith("https://"): n8n = "jsons://" + n8n[8:]
+        if n8n.startswith("http://"): n8n = "n8n://" + n8n[7:]
+        elif n8n.startswith("https://"): n8n = "n8ns://" + n8n[8:]
         urls.append(n8n)
         
     if not urls:
@@ -119,6 +119,14 @@ def test_notification():
                 chat_id = parts[3]
                 txt = f"🎉 Successfully entered **TEST GAME NAME** (10 P)\nhttps://steamgifts.com/"
                 requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={"chat_id": chat_id, "text": txt, "parse_mode": "Markdown"})
+            elif url.startswith('n8n://') or url.startswith('n8ns://'):
+                pure_url = url.replace('n8n://', 'http://').replace('n8ns://', 'https://')
+                requests.post(pure_url, json={
+                    "Game Name": "TEST GAME NAME",
+                    "Points used": 10,
+                    "Thumbnail URL": image_url,
+                    "Link to giveaway URL": "https://steamgifts.com/"
+                })
             else: 
                 requests.post(url.replace('json://', 'http://').replace('jsons://', 'https://'), json=payload)
                 
@@ -158,8 +166,8 @@ def start_bot():
         urls.append(f"tgram://{config.get('telegram_token')}/{config.get('telegram_chat_id')}")
     if config.get("n8n_webhook"):
         n8n = config.get("n8n_webhook")
-        if n8n.startswith("http://"): n8n = "json://" + n8n[7:]
-        elif n8n.startswith("https://"): n8n = "jsons://" + n8n[8:]
+        if n8n.startswith("http://"): n8n = "n8n://" + n8n[7:]
+        elif n8n.startswith("https://"): n8n = "n8ns://" + n8n[8:]
         urls.append(n8n)
 
     bot_thread = threading.Thread(

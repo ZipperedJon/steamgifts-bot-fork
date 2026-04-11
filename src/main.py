@@ -149,6 +149,14 @@ class SteamGifts:
                     requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={"chat_id": chat_id, "text": txt, "parse_mode": "Markdown"})
                 elif url.startswith('discord://'):
                     pass # Handled below
+                elif url.startswith('n8n://') or url.startswith('n8ns://'):
+                    pure_url = url.replace('n8n://', 'http://').replace('n8ns://', 'https://')
+                    requests.post(pure_url, json={
+                        "Game Name": game_name,
+                        "Points used": int(game_cost),
+                        "Thumbnail URL": image_url,
+                        "Link to giveaway URL": game_link
+                    })
                 else: 
                     requests.post(url.replace('json://', 'http://').replace('jsons://', 'https://'), json=payload)
             except Exception as e:
