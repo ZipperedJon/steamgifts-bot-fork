@@ -51,8 +51,7 @@ body {
 .sidebar.collapsed {
     width: 70px;
     min-width: 70px;
-    padding: 1.5rem 0.75rem;
-    align-items: center;
+    padding: 1.5rem 0;
 }
 
 .sidebar-header {
@@ -60,11 +59,12 @@ body {
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    width: 100%;
+    padding: 0 1.5rem;
 }
 
 .sidebar.collapsed .sidebar-header {
     justify-content: center;
+    padding: 0;
 }
 
 .hamburger-btn {
@@ -178,6 +178,12 @@ nav {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    padding: 0 0.5rem;
+}
+
+.sidebar.collapsed nav {
+    padding: 0 0.5rem;
+    align-items: center;
 }
 
 .nav-icon {
@@ -214,7 +220,14 @@ nav {
 .sidebar.collapsed .nav-item {
     justify-content: center;
     padding: 0.85rem;
-    border-left: 3px solid transparent;
+    border-left: none;
+    width: 48px;
+    height: 48px;
+}
+
+.sidebar.collapsed .nav-item.active {
+    border-left: none;
+    border-bottom: 3px solid var(--primary-color);
 }
 
 .nav-item:hover {
@@ -235,7 +248,7 @@ nav {
 
 .controls {
     margin-top: 2rem;
-    width: 100%;
+    padding: 0 0.5rem;
 }
 
 /* Button icon/label toggling for collapsed sidebar */
