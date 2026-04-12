@@ -52,6 +52,7 @@ body {
     width: 70px;
     min-width: 70px;
     padding: 1.5rem 0.75rem;
+    align-items: center;
 }
 
 .sidebar-header {
@@ -59,6 +60,11 @@ body {
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
 }
 
 .hamburger-btn {
@@ -208,6 +214,7 @@ nav {
 .sidebar.collapsed .nav-item {
     justify-content: center;
     padding: 0.85rem;
+    border-left: 3px solid transparent;
 }
 
 .nav-item:hover {
@@ -228,6 +235,7 @@ nav {
 
 .controls {
     margin-top: 2rem;
+    width: 100%;
 }
 
 /* Button icon/label toggling for collapsed sidebar */
