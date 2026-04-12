@@ -1,17 +1,22 @@
 # SteamGifts-Bot (Web UI Edition)
 
-![](https://i.imgur.com/oCob3wQ.gif)
+![](images/dashboard_demo.webp)
 
 > [!NOTE]
-> This is a modernized, Dockerized fork of the original [stilManiac/steamgifts-bot](https://github.com/stilManiac/steamgifts-bot). All original bot features remain, but with added backend architecture and a full graphical User Interface!
+> This is a modernized, Dockerized fork of the original [stilManiac/steamgifts-bot](https://github.com/stilManiac/steamgifts-bot). All original bot features remain, but with added backend architecture, multi-node webhook support, and a seamlessly animated graphical User Interface!
 
 ### Features
-- Modern, dynamic Web UI with glassmorphic aesthetics.
-- Real-time logging through Server-Sent Events.
-- Automated entry into giveaways.
-- Configurable settings via UI (Sleep times, min points, pinned giveaways).
-- Undetectable (Emulates Chrome User-Agent and handles cookies properly).
-- Headless Docker integration for 24/7 unassisted operation.
+- Modern, dynamic Web UI with animated, glassmorphic aesthetics.
+- Real-time logging console via Server-Sent Events.
+- Live point tracker and automated giveaway entry configurations.
+- Dynamic Web History pane pulling high-resolution game banners straight from the Valve content delivery network.
+- Explicit formatting and 1-click test support for Deep Webhooks (Discord Embeds, Direct Telegram bots, or Raw n8n node feeds).
+- Intelligent CSS Layouts featuring hash-routing (`#history`, `#settings`), allowing you to effortlessly iframe specific tabs flawlessly into Homarr dashboards!
+- Fully Headless REST orchestration for zero-touch background execution.
+
+<br>
+
+🔥 **A massive shoutout to [Komodo](https://github.com/mbecker20/komodo) for making robust graphical Docker management absolutely incredible. Testing and managing this persistent container across iterations was an absolute breeze thanks to Komodo!** 🔥
 
 ### Recommended Installation (Docker)
 
