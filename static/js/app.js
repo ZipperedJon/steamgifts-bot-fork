@@ -132,16 +132,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
     const botStatus = document.getElementById('botStatus');
+    const botStatusDot = document.getElementById('botStatusDot');
 
     function updateStatus(isRunning) {
         if(isRunning) {
             botStatus.textContent = 'Running';
             botStatus.className = 'status-badge online';
+            if(botStatusDot) botStatusDot.className = 'status-dot online';
             startBtn.style.display = 'none';
             stopBtn.style.display = 'block';
         } else {
             botStatus.textContent = 'Stopped';
             botStatus.className = 'status-badge offline';
+            if(botStatusDot) botStatusDot.className = 'status-dot offline';
             startBtn.style.display = 'block';
             stopBtn.style.display = 'none';
         }

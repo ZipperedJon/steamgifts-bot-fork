@@ -36,23 +36,35 @@ body {
 
 .sidebar {
     width: 280px;
+    min-width: 280px;
     background: var(--sidebar-bg);
     backdrop-filter: blur(16px);
     border-right: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    padding: 2rem;
+    padding: 1.5rem;
     z-index: 10;
-    transition: margin-left 0.3s ease;
+    transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease;
+    overflow: hidden;
 }
 
 .sidebar.collapsed {
-    margin-left: -280px;
+    width: 70px;
+    min-width: 70px;
+    padding: 1.5rem 0.75rem;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .hamburger-btn {
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(12px);
@@ -74,7 +86,7 @@ body {
 }
 
 .hamburger-btn div {
-    width: 22px;
+    width: 20px;
     height: 2px;
     background: currentColor;
     border-radius: 2px;
@@ -83,9 +95,15 @@ body {
 
 .logo {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .logo {
+    opacity: 0;
+    width: 0;
 }
 
 .logo h2 {
@@ -96,6 +114,34 @@ body {
     color: transparent;
 }
 
+/* Status indicator */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0 0.25rem;
+    justify-content: center;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.status-dot.online {
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+}
+
+.status-dot.offline {
+    background: var(--danger-color);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
 .status-badge {
     font-size: 0.75rem;
     padding: 4px 12px;
@@ -103,6 +149,12 @@ body {
     background: rgba(255, 255, 255, 0.1);
     font-weight: 600;
     transition: all 0.3s;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .status-badge {
+    display: none;
 }
 
 .status-badge.online {
@@ -122,19 +174,50 @@ nav {
     gap: 0.5rem;
 }
 
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    flex-shrink: 0;
+}
+
 .nav-item {
     color: var(--text-muted);
     text-decoration: none;
-    padding: 1rem;
+    padding: 0.85rem 1rem;
     border-radius: 0.75rem;
     transition: all 0.2s ease;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.nav-label {
+    overflow: hidden;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .nav-label {
+    opacity: 0;
+    width: 0;
+}
+
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 0.85rem;
 }
 
 .nav-item:hover {
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-color);
     transform: translateX(4px);
+}
+
+.sidebar.collapsed .nav-item:hover {
+    transform: none;
 }
 
 .nav-item.active {
@@ -145,6 +228,20 @@ nav {
 
 .controls {
     margin-top: 2rem;
+}
+
+/* Button icon/label toggling for collapsed sidebar */
+.btn-icon {
+    display: none;
+    font-size: 1.1rem;
+}
+
+.sidebar.collapsed .btn-label {
+    display: none;
+}
+
+.sidebar.collapsed .btn-icon {
+    display: inline;
 }
 
 .btn {
