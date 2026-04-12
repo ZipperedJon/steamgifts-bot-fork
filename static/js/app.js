@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    if (hamburgerBtn) {
+        const sidebar = document.querySelector('.sidebar');
+        hamburgerBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+    }
+
     const tabs = document.querySelectorAll('.nav-item');
     const panes = document.querySelectorAll('.tab-pane');
     

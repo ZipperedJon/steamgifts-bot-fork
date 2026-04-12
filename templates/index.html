@@ -27,8 +27,11 @@
     </div>
 
     <main class="content">
-        <div class="top-bar" style="position: absolute; top: 2rem; right: 3rem; z-index: 10;">
-            <div class="points-badge" id="botPoints" style="display: none; padding: 8px 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 999px; backdrop-filter: blur(12px); font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(0,0,0,0.2);">
+        <div class="top-bar" style="position: absolute; top: 2rem; left: 3rem; right: 3rem; z-index: 10; display: flex; justify-content: space-between; pointer-events: none;">
+            <button id="hamburgerBtn" class="hamburger-btn" style="pointer-events: auto;" title="Toggle Sidebar">
+                <div></div><div></div><div></div>
+            </button>
+            <div class="points-badge" id="botPoints" style="pointer-events: auto; padding: 8px 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 999px; backdrop-filter: blur(12px); font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(0,0,0,0.2); display: none;">
                 <span style="color: var(--text-muted); margin-right: 5px;">Wallet:</span> <span id="pointsValue" style="color: var(--primary-color);">0</span> P
             </div>
         </div>
