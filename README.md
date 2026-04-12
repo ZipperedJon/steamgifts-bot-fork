@@ -1,7 +1,5 @@
 # SteamGifts-Bot (Web UI Edition)
 
-![](images/dashboard_demo.webp)
-
 > [!NOTE]
 > This is a modernized, Dockerized fork of the original [stilManiac/steamgifts-bot](https://github.com/stilManiac/steamgifts-bot). All original bot features remain, but with added backend architecture, multi-node webhook support, and a seamlessly animated graphical User Interface!
 
