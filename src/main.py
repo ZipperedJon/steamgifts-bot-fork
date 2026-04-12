@@ -16,8 +16,13 @@ from datetime import datetime
 
 from src.logger import log
 
+# Safety detection: words that indicate a trap/scam giveaway
+FORBIDDEN_WORDS = (" ban", " fake", " bot", " not enter", " don't enter", " do not enter")
+# Words that look like forbidden words but are actually benign (false positives)
+GOOD_WORDS = (" bank", " banan", " both", " band", " banner", " bang")
+
 class SteamGifts:
-    def __init__(self, cookie, gifts_type, pinned, min_points, sleep_low_points=900, sleep_list_ended=120, webhook_url=""):
+    def __init__(self, cookie, gifts_type, pinned, min_points, sleep_low_points=900, sleep_list_ended=120, webhook_url="", safety_check=True):
         self.cookie = {
             'PHPSESSID': cookie
         }
@@ -26,6 +31,7 @@ class SteamGifts:
         self.min_points = int(min_points)
         self.sleep_low_points = int(sleep_low_points)
         self.sleep_list_ended = int(sleep_list_ended)
+        self.safety_check = safety_check
 
         self.base = "https://www.steamgifts.com"
         self.session = requests.Session()
@@ -221,6 +227,15 @@ class SteamGifts:
                     if img_match:
                         image_url = img_match.group(1)
 
+                    # Safety check: scan the giveaway page for trap indicators
+                    if self.safety_check:
+                        is_safe, safety_score, details = self.check_giveaway_safety(game_link)
+                        if not is_safe:
+                            log(f"🛡️ SKIPPED (unsafe): {game_name} — score {safety_score}, found: {', '.join(details)}", "red")
+                            continue
+                        elif safety_score < 100:
+                            log(f"🛡️ Borderline: {game_name} — score {safety_score}, found: {', '.join(details)}", "yellow")
+
                     res = self.entry_gift(game_id)
                     if res:
                         self.points -= int(game_cost)
@@ -256,6 +271,51 @@ class SteamGifts:
         except:
             pass
         return False
+
+    def check_giveaway_safety(self, giveaway_url):
+        """Check if a giveaway page contains suspicious/trap content.
+        
+        Fetches the individual giveaway page and scans the text for
+        forbidden words (ban, fake, don't enter, etc.). Subtracts
+        false positives (bank, banner, etc.) to avoid over-blocking.
+        
+        Returns:
+            Tuple of (is_safe: bool, safety_score: int, details: list)
+        """
+        try:
+            r = self.requests_retry_session().get(giveaway_url, cookies=self.cookie)
+            text_lower = r.text.lower()
+        except Exception as e:
+            log(f"🛡️ Safety check failed for {giveaway_url}: {str(e)}", "yellow")
+            # If we can't fetch the page, assume safe to avoid blocking everything
+            return (True, 100, [])
+
+        bad_count = 0
+        good_count = 0
+        found_bad_words = []
+
+        # Count forbidden words
+        for bad_word in FORBIDDEN_WORDS:
+            count = text_lower.count(bad_word.lower())
+            if count > 0:
+                bad_count += count
+                found_bad_words.append(bad_word.strip())
+
+        # Count false-positive indicators (only if we found bad words)
+        if bad_count > 0:
+            for good_word in GOOD_WORDS:
+                good_count += text_lower.count(good_word.lower())
+
+        # Net bad = bad words minus false positives
+        net_bad = max(0, bad_count - good_count)
+
+        if net_bad == 0:
+            return (True, 100, found_bad_words)
+        elif net_bad <= 2:
+            return (True, 50, found_bad_words)
+        else:
+            safety_score = max(0, 100 - (net_bad * 20))
+            return (False, safety_score, found_bad_words)
 
     def start(self):
         if not self.running:

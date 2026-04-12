@@ -35,17 +35,18 @@ def load_config():
         "telegram_token": "",
         "telegram_chat_id": "",
         "n8n_webhook": "",
-        "auto_start": False
+        "auto_start": False,
+        "safety_check": True
     }
 
 def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f, indent=4)
 
-def run_bot(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url):
+def run_bot(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url, safety_check):
     global bot_instance
     try:
-        bot_instance = SteamGifts(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url)
+        bot_instance = SteamGifts(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url, safety_check)
         bot_instance.start()
     except Exception as e:
         log(f"Bot error: {str(e)}", "red")
@@ -173,7 +174,7 @@ def start_bot():
 
     bot_thread = threading.Thread(
         target=run_bot, 
-        args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), ','.join(urls))
+        args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), ','.join(urls), config.get('safety_check', True))
     )
     bot_thread.daemon = True
     bot_thread.start()
@@ -230,7 +231,7 @@ def auto_start_bot():
 
         bot_thread = threading.Thread(
             target=run_bot,
-            args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), ','.join(urls))
+            args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), ','.join(urls), config.get('safety_check', True))
         )
         bot_thread.daemon = True
         bot_thread.start()

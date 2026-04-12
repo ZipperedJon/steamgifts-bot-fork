@@ -64,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if(data.n8n_webhook) document.getElementById('n8n_webhook').value = data.n8n_webhook;
             if(data.pinned) document.getElementById('pinned').checked = data.pinned;
             if(data.auto_start) document.getElementById('auto_start').checked = data.auto_start;
+            if(data.safety_check !== undefined) document.getElementById('safety_check').checked = data.safety_check;
         });
 
     function saveConfig(e, msgElement) {
@@ -80,7 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
             telegram_chat_id: document.getElementById('telegram_chat_id').value,
             n8n_webhook: document.getElementById('n8n_webhook').value,
             pinned: document.getElementById('pinned').checked,
-            auto_start: document.getElementById('auto_start').checked
+            auto_start: document.getElementById('auto_start').checked,
+            safety_check: document.getElementById('safety_check').checked
         };
         window.currentDateFormat = config.date_format;
         fetch('/api/config', {
