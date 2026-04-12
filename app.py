@@ -34,7 +34,8 @@ def load_config():
         "discord_webhook": "",
         "telegram_token": "",
         "telegram_chat_id": "",
-        "n8n_webhook": ""
+        "n8n_webhook": "",
+        "auto_start": False
     }
 
 def save_config(config):
@@ -210,5 +211,30 @@ def stream_logs():
     
     return Response(generate(), mimetype='text/event-stream')
 
+def auto_start_bot():
+    """Check config and auto-start the bot if enabled."""
+    global bot_thread
+    config = load_config()
+    if config.get('auto_start') and config.get('cookie'):
+        log("Auto-start enabled. Starting bot...", "green")
+        urls = []
+        if config.get("discord_webhook"):
+            urls.append(config.get("discord_webhook"))
+        if config.get("telegram_token") and config.get("telegram_chat_id"):
+            urls.append(f"tgram://{config.get('telegram_token')}/{config.get('telegram_chat_id')}")
+        if config.get("n8n_webhook"):
+            n8n = config.get("n8n_webhook")
+            if n8n.startswith("http://"): n8n = "n8n://" + n8n[7:]
+            elif n8n.startswith("https://"): n8n = "n8ns://" + n8n[8:]
+            urls.append(n8n)
+
+        bot_thread = threading.Thread(
+            target=run_bot,
+            args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), ','.join(urls))
+        )
+        bot_thread.daemon = True
+        bot_thread.start()
+
 if __name__ == '__main__':
+    auto_start_bot()
     app.run(host='0.0.0.0', port=1738, threaded=True)

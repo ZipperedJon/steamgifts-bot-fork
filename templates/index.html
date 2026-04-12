@@ -112,6 +112,15 @@
                     </div>
                 </fieldset>
 
+                <fieldset style="border: none; margin-bottom: 1.5rem;">
+                    <legend style="font-weight: 700; font-size: 1.1rem; color: #8b5cf6; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Startup Behavior</legend>
+                    <div style="display: flex; flex-direction: row; align-items: center; gap: 0.75rem; margin-top: 15px;">
+                        <input type="checkbox" id="auto_start" name="auto_start" style="width: 20px; height: 20px; accent-color: #8b5cf6; cursor: pointer; margin: 0;">
+                        <label for="auto_start" style="margin-bottom: 0; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">Auto-start bot on launch</label>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px; opacity: 0.7;">When enabled, the bot will automatically start running when the container restarts.</p>
+                </fieldset>
+
                 <button type="submit" class="btn submit" style="margin-top: 0;">Save Configuration</button>
                 <div id="saveMsg" class="success-msg hidden">Saved Successfully!</div>
             </form>
