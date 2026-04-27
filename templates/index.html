@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SteamGifts Bot Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
 </head>
 <body>
     <div class="sidebar" id="sidebar">
@@ -141,21 +141,21 @@
                 <fieldset style="border: none; margin-bottom: 1.5rem;">
                     <legend style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color); margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">History Page Settings</legend>
                     <div class="form-group row" style="margin-top: 15px;">
-                        <div class="col">
+                        <div class="col" style="display: flex; flex-direction: column; align-items: stretch;">
                             <label for="date_format">Date Format</label>
-                            <select id="date_format" name="date_format">
+                            <select id="date_format" name="date_format" style="height: 48px; margin: 0; padding: 0 1rem; width: 100%; box-sizing: border-box;">
                                 <option value="US">MM-DD-YYYY, 12-Hour (AM/PM)</option>
                                 <option value="EU">DD-MM-YYYY, 24-Hour</option>
                                 <option value="ISO">YYYY-MM-DD HH:mm:ss</option>
                             </select>
                         </div>
-                        <div class="col">
-                            <label for="timezone">Time Zone</label>
-                            <div style="display: flex; gap: 0.5rem; width: 100%; align-items: stretch;">
-                                <select id="timezone" name="timezone" style="flex: 1; margin: 0;">
+                        <div class="col" style="display: flex; flex-direction: column; align-items: stretch;">
+                            <label for="timezone" style="align-self: flex-start; text-align: left; width: 100%; display: block; margin-bottom: 0.5rem; margin-left: 0;">Time Zone</label>
+                            <div style="display: flex; gap: 0.5rem; width: 100%; height: 48px; align-items: stretch;">
+                                <select id="timezone" name="timezone" style="flex: 1; height: 100%; margin: 0; padding: 0 1rem; box-sizing: border-box;">
                                     <option value="UTC">UTC (Default)</option>
                                 </select>
-                                <button type="button" id="autoDetectTzBtn" class="btn" style="flex: 0 0 auto; width: auto; margin: 0; padding: 0.8rem 1.25rem; border-radius: 0.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-color); display: flex; align-items: center; justify-content: center; box-shadow: none;" title="Auto Detect Time Zone">Detect</button>
+                                <button type="button" id="autoDetectTzBtn" class="btn" style="flex: 0 0 auto; width: auto; height: 100%; margin: 0; padding: 0 1.25rem; border-radius: 0.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-color); display: flex; align-items: center; justify-content: center; box-shadow: none; box-sizing: border-box;" title="Auto Detect Time Zone">Detect</button>
                             </div>
                         </div>
                     </div>
@@ -254,6 +254,6 @@
         </section>
     </main>
 
-    <script src="/static/js/app.js?v=3"></script>
+    <script src="/static/js/app.js?v=4"></script>
 </body>
 </html>
