@@ -31,6 +31,7 @@ def load_config():
         "sleep_low_points": 900,
         "sleep_list_ended": 120,
         "date_format": "US",
+        "timezone": "UTC",
         "discord_webhook": "",
         "telegram_token": "",
         "telegram_chat_id": "",

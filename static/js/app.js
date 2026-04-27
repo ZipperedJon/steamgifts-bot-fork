@@ -2,8 +2,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     if (hamburgerBtn) {
         const sidebar = document.querySelector('.sidebar');
+        
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            sidebar.classList.add('collapsed');
+        }
+
         hamburgerBtn.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
         });
     }
 
@@ -45,6 +51,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const notifySaveMsg = document.getElementById('notifySaveMsg');
     
     window.currentDateFormat = 'US';
+    window.currentTimeZone = 'UTC';
+
+    // Populate Timezone select
+    const tzSelect = document.getElementById('timezone');
+    if (tzSelect && Intl.supportedValuesOf) {
+        tzSelect.innerHTML = '';
+        Intl.supportedValuesOf('timeZone').forEach(tz => {
+            const option = document.createElement('option');
+            option.value = tz;
+            option.textContent = tz.replace(/_/g, ' ');
+            tzSelect.appendChild(option);
+        });
+        tzSelect.value = 'UTC';
+    } else if (tzSelect) {
+        // Fallback if supportedValuesOf is missing
+        tzSelect.innerHTML = '<option value="UTC">UTC</option>';
+    }
+
+    const autoDetectTzBtn = document.getElementById('autoDetectTzBtn');
+    if (autoDetectTzBtn) {
+        autoDetectTzBtn.addEventListener('click', () => {
+            try {
+                const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (userTz) {
+                    if (!tzSelect.querySelector(`option[value="${userTz}"]`)) {
+                        const option = document.createElement('option');
+                        option.value = userTz;
+                        option.textContent = userTz.replace(/_/g, ' ');
+                        tzSelect.appendChild(option);
+                    }
+                    tzSelect.value = userTz;
+                }
+            } catch (e) {
+                console.error('Time zone detection failed', e);
+            }
+        });
+    }
+
     // Load config
     fetch('/api/config')
         .then(r => r.json())
@@ -57,6 +101,16 @@ document.addEventListener("DOMContentLoaded", () => {
             if(data.date_format) {
                 document.getElementById('date_format').value = data.date_format;
                 window.currentDateFormat = data.date_format;
+            }
+            if(data.timezone) {
+                if (tzSelect && !tzSelect.querySelector(`option[value="${data.timezone}"]`)) {
+                    const option = document.createElement('option');
+                    option.value = data.timezone;
+                    option.textContent = data.timezone.replace(/_/g, ' ');
+                    tzSelect.appendChild(option);
+                }
+                if (tzSelect) tzSelect.value = data.timezone;
+                window.currentTimeZone = data.timezone;
             }
             if(data.discord_webhook) document.getElementById('discord_webhook').value = data.discord_webhook;
             if(data.telegram_token) document.getElementById('telegram_token').value = data.telegram_token;
@@ -76,6 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
             sleep_low_points: parseInt(document.getElementById('sleep_low_points').value) || 900,
             sleep_list_ended: parseInt(document.getElementById('sleep_list_ended').value) || 120,
             date_format: document.getElementById('date_format').value,
+            timezone: document.getElementById('timezone') ? document.getElementById('timezone').value : 'UTC',
             discord_webhook: document.getElementById('discord_webhook').value,
             telegram_token: document.getElementById('telegram_token').value,
             telegram_chat_id: document.getElementById('telegram_chat_id').value,
@@ -85,6 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
             safety_check: document.getElementById('safety_check').checked
         };
         window.currentDateFormat = config.date_format;
+        if (config.timezone) window.currentTimeZone = config.timezone;
         fetch('/api/config', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -232,14 +288,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const d = new Date(dateStr);
             if(isNaN(d)) return dateStr;
             const fmt = window.currentDateFormat;
+            const tzOptions = window.currentTimeZone ? { timeZone: window.currentTimeZone } : {};
+
             if(fmt === 'US') {
-                return d.toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true});
+                return d.toLocaleString('en-US', { ...tzOptions, month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true});
             } else if(fmt === 'EU') {
-                return d.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false});
+                return d.toLocaleString('en-GB', { ...tzOptions, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false});
             } else {
                 // ISO
-                const pad = n => n.toString().padStart(2, '0');
-                return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                return d.toLocaleString('sv-SE', { ...tzOptions, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace('T', ' ');
             }
         } catch(e) {
             return dateStr;
