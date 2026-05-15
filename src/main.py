@@ -110,7 +110,7 @@ class SteamGifts:
             "cost": game_cost,
             "link": game_link,
             "image": image_url,
-            "date": datetime.now().isoformat()
+            "date": datetime.now().astimezone().isoformat()
         })
 
         with open(self.history_file, 'w', encoding='utf-8') as f:
@@ -182,13 +182,15 @@ class SteamGifts:
             game_list = soup.find_all('div', {'class': 'giveaway__row-inner-wrap'})
 
             if not len(game_list):
-                log("⛔  Page is empty. Please, select another type.", "red")
-                self.running = False
+                if n == 1:
+                    log("⛔  Page is empty. Please, select another type.", "red")
+                    self.running = False
                 break
 
+            low_points = False
             for item in game_list:
                 if not self.running:
-                    return
+                    return False
 
                 if len(item.get('class', [])) == 2 and not self.pinned:
                     continue
@@ -198,9 +200,9 @@ class SteamGifts:
                     log(txt, "yellow")
                     self.sleep_with_check(self.sleep_low_points)
                     if not self.running:
-                        return
-                    self.start()
-                    return
+                        return False
+                    low_points = True
+                    break
 
                 game_cost = item.find_all('span', {'class': 'giveaway__heading__thin'})[-1]
 
@@ -250,16 +252,12 @@ class SteamGifts:
 
                         self.sleep_with_check(randint(3, 7))
 
+            if low_points:
+                return True
+
             n = n+1
 
-
-        if not self.running:
-            return
-
-        log(f"🛋️  List of games is ended. Waiting {self.sleep_list_ended} seconds to update...", "yellow")
-        self.sleep_with_check(self.sleep_list_ended)
-        if self.running:
-            self.start()
+        return False
 
     def entry_gift(self, game_id):
         payload = {'xsrf_token': self.xsrf_token, 'do': 'entry_insert', 'code': game_id}
@@ -321,16 +319,24 @@ class SteamGifts:
         if not self.running:
             self.running = True
 
-        self.update_info()
+        while self.running:
+            self.update_info()
 
-        if not self.running:
-            return
+            if not self.running:
+                break
 
-        if self.points > 0:
-            txt = "🤖 Hoho! I am back! You have %d points. Lets hack." % self.points
-            log(txt, "blue")
+            if self.points > 0:
+                txt = "🤖 Hoho! I am back! You have %d points. Lets hack." % self.points
+                log(txt, "blue")
 
-        self.get_game_content()
+            low_points = self.get_game_content()
+
+            if not self.running:
+                break
+
+            if not low_points:
+                log(f"🛋️  List of games is ended. Waiting {self.sleep_list_ended} seconds to update...", "yellow")
+                self.sleep_with_check(self.sleep_list_ended)
 
     def stop(self):
         self.running = False
