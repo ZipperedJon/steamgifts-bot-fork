@@ -544,6 +544,8 @@ tbody tr:hover {
     border-radius: 999px;
     font-size: 0.85rem;
     font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
 }
 
 /* Account Cards */
@@ -601,7 +603,6 @@ tbody tr:hover {
     font-size: 0.9rem;
 }
 
-/* Modal */
 .modal {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -615,5 +616,28 @@ tbody tr:hover {
 
 .modal.hidden {
     display: none;
+}
+
+.modal-content {
+    background: #0f172a;
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
 }
 
