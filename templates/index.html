@@ -18,17 +18,17 @@
             </div>
         </div>
         <div class="status-indicator">
-            <div class="status-dot offline" id="botStatusDot"></div>
-            <div class="status-badge offline" id="botStatus">Offline</div>
+            <div class="status-dot online" id="globalStatusDot" style="background-color: var(--primary-color);"></div>
+            <div class="status-badge online" id="globalStatus" style="color: var(--primary-color);">Active Bots: 0</div>
         </div>
         <nav>
-            <a href="#" class="nav-item active" data-tab="settings" title="Bot Settings">
+            <a href="#" class="nav-item active" data-tab="accounts" title="Accounts">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                <span class="nav-label">Bot Settings</span>
+                <span class="nav-label">Accounts</span>
             </a>
-            <a href="#" class="nav-item" data-tab="ui-settings" title="WebUI Settings">
+            <a href="#" class="nav-item" data-tab="global-settings" title="Global Settings">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                <span class="nav-label">WebUI Settings</span>
+                <span class="nav-label">Global Settings</span>
             </a>
             <a href="#" class="nav-item" data-tab="notifications" title="Notifications">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -43,101 +43,106 @@
                 <span class="nav-label">History</span>
             </a>
         </nav>
-        <div class="controls">
-            <button id="startBtn" class="btn primary"><span class="btn-label">Start Bot</span><span class="btn-icon" title="Start Bot">▶</span></button>
-            <button id="stopBtn" class="btn danger" style="display: none;"><span class="btn-label">Stop Bot</span><span class="btn-icon" title="Stop Bot">■</span></button>
+        <div class="controls" style="display: none;">
+            <!-- Removed global start/stop -->
         </div>
     </div>
 
     <main class="content">
-        <div class="top-bar" style="position: absolute; top: 2rem; right: 3rem; z-index: 10;">
-            <div class="points-badge" id="botPoints" style="padding: 8px 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 999px; backdrop-filter: blur(12px); font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(0,0,0,0.2); display: none;">
-                <span style="color: var(--text-muted); margin-right: 5px;">Wallet:</span> <span id="pointsValue" style="color: var(--primary-color);">0</span> P
-            </div>
-        </div>
+        <!-- Removed top-bar botPoints -->
 
-        <!-- Bot Settings Tab -->
-        <section id="settings" class="tab-pane active">
-            <header>
-                <h1>Bot Configuration</h1>
-                <p>Manage your account settings and bot behavior.</p>
+        <!-- Accounts Tab -->
+        <section id="accounts" class="tab-pane active">
+            <header style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>Bot Accounts</h1>
+                    <p>Manage multiple accounts and their behaviors.</p>
+                </div>
+                <button id="addAccountBtn" class="btn primary">Add Account</button>
             </header>
-            <form id="configForm" class="glass-form">
-                <fieldset style="border: none; margin-bottom: 1.5rem;">
-                    <legend style="font-weight: 700; font-size: 1.1rem; color: #10b981; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Account Credentials</legend>
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label for="cookie">PHPSESSID Cookie</label>
-                        <input type="password" id="cookie" name="cookie" required placeholder="Enter your PHPSESSID">
-                    </div>
-                </fieldset>
+            <div id="accountsList" class="accounts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                <!-- Account cards go here -->
+            </div>
 
-                <fieldset style="border: none; margin-bottom: 1.5rem;">
-                    <legend style="font-weight: 700; font-size: 1.1rem; color: #f59e0b; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Scraping Strategy</legend>
-                    <div class="form-group row" style="margin-top: 15px; align-items: flex-end;">
-                        <div class="col" style="flex: 2;">
-                            <label for="gift_type">Gift Category</label>
-                            <select id="gift_type" name="gift_type">
-                                <option value="All">All</option>
-                                <option value="Wishlist">Wishlist</option>
-                                <option value="Recommended">Recommended</option>
-                                <option value="Copies">Copies</option>
-                                <option value="DLC">DLC</option>
-                                <option value="New">New</option>
-                            </select>
+            <!-- Account Modal -->
+            <div id="accountModal" class="modal hidden">
+                <div class="modal-content glass-form" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 id="modalTitle">Edit Account</h2>
+                        <button id="closeModalBtn" class="btn" style="padding: 5px 10px; background: transparent; border: none; color: white;">✕</button>
+                    </div>
+                    <form id="accountForm">
+                        <input type="hidden" id="account_id" name="account_id">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="account_name">Account Name</label>
+                            <input type="text" id="account_name" name="account_name" required placeholder="e.g. Main Account">
                         </div>
-                        <div class="col" style="flex: 1; justify-content: flex-end; padding-bottom: 0.8rem;">
-                            <div style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; margin-bottom: 0;">
-                                <input type="checkbox" id="pinned" name="pinned" style="width: 20px; height: 20px; accent-color: var(--primary-color); cursor: pointer; margin: 0;">
-                                <label for="pinned" style="margin-bottom: 0; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">Enter pinned games?</label>
+                        <fieldset style="border: none; margin-bottom: 1.5rem;">
+                            <legend style="font-weight: 700; font-size: 1.1rem; color: #10b981; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Credentials</legend>
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label for="cookie">PHPSESSID Cookie</label>
+                                <input type="password" id="cookie" name="cookie" required placeholder="Enter your PHPSESSID">
                             </div>
-                        </div>
-                    </div>
-                    <div style="display: flex; flex-direction: row; align-items: center; gap: 0.75rem; margin-top: 12px;">
-                        <input type="checkbox" id="safety_check" name="safety_check" checked style="width: 20px; height: 20px; accent-color: #10b981; cursor: pointer; margin: 0;">
-                        <label for="safety_check" style="margin-bottom: 0; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">🛡️ Enable Safety Check (avoid trap/scam giveaways)</label>
-                    </div>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 6px; opacity: 0.7; margin-left: 32px;">Scans each giveaway page for suspicious words like "ban", "don't enter", etc. before entering.</p>
-                </fieldset>
+                        </fieldset>
 
-                <fieldset style="border: none; margin-bottom: 1.5rem;">
-                    <legend style="font-weight: 700; font-size: 1.1rem; color: #3b82f6; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Automation Timing</legend>
-                    <div class="form-group row" style="margin-top: 15px; flex-wrap: wrap; gap: 1rem;">
-                        <div class="col" style="min-width: 120px;">
-                            <label for="min_points">Minimum Points</label>
-                            <input type="number" id="min_points" name="min_points" min="1" value="10">
-                        </div>
-                        <div class="col" style="min-width: 120px;">
-                            <label for="sleep_low_points">Sleep (No Pts) [s]</label>
-                            <input type="number" id="sleep_low_points" name="sleep_low_points" min="1" value="900">
-                        </div>
-                        <div class="col" style="min-width: 120px;">
-                            <label for="sleep_list_ended">Sleep (No Gifts) [s]</label>
-                            <input type="number" id="sleep_list_ended" name="sleep_list_ended" min="1" value="120">
-                        </div>
-                    </div>
-                </fieldset>
+                        <fieldset style="border: none; margin-bottom: 1.5rem;">
+                            <legend style="font-weight: 700; font-size: 1.1rem; color: #f59e0b; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Scraping Strategy</legend>
+                            <div class="form-group row" style="margin-top: 15px; align-items: flex-end;">
+                                <div class="col" style="flex: 2;">
+                                    <label for="gift_type">Gift Category</label>
+                                    <select id="gift_type" name="gift_type">
+                                        <option value="All">All</option>
+                                        <option value="Wishlist">Wishlist</option>
+                                        <option value="Recommended">Recommended</option>
+                                        <option value="Copies">Copies</option>
+                                        <option value="DLC">DLC</option>
+                                        <option value="New">New</option>
+                                    </select>
+                                </div>
+                                <div class="col" style="flex: 1; justify-content: flex-end; padding-bottom: 0.8rem;">
+                                    <div style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; margin-bottom: 0;">
+                                        <input type="checkbox" id="pinned" name="pinned" style="width: 20px; height: 20px; accent-color: var(--primary-color); cursor: pointer; margin: 0;">
+                                        <label for="pinned" style="margin-bottom: 0; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">Enter pinned games?</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: row; align-items: center; gap: 0.75rem; margin-top: 12px;">
+                                <input type="checkbox" id="safety_check" name="safety_check" checked style="width: 20px; height: 20px; accent-color: #10b981; cursor: pointer; margin: 0;">
+                                <label for="safety_check" style="margin-bottom: 0; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">🛡️ Enable Safety Check (avoid trap/scam giveaways)</label>
+                            </div>
+                        </fieldset>
 
-                <fieldset style="border: none; margin-bottom: 1.5rem;">
-                    <legend style="font-weight: 700; font-size: 1.1rem; color: #8b5cf6; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Startup Behavior</legend>
-                    <div style="display: flex; flex-direction: row; align-items: center; gap: 0.75rem; margin-top: 15px;">
-                        <input type="checkbox" id="auto_start" name="auto_start" style="width: 20px; height: 20px; accent-color: #8b5cf6; cursor: pointer; margin: 0;">
-                        <label for="auto_start" style="margin-bottom: 0; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">Auto-start bot on launch</label>
-                    </div>
-                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px; opacity: 0.7;">When enabled, the bot will automatically start running when the container restarts.</p>
-                </fieldset>
+                        <fieldset style="border: none; margin-bottom: 1.5rem;">
+                            <legend style="font-weight: 700; font-size: 1.1rem; color: #3b82f6; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Automation Timing</legend>
+                            <div class="form-group row" style="margin-top: 15px; flex-wrap: wrap; gap: 1rem;">
+                                <div class="col" style="min-width: 120px;">
+                                    <label for="min_points">Minimum Points</label>
+                                    <input type="number" id="min_points" name="min_points" min="1" value="10">
+                                </div>
+                                <div class="col" style="min-width: 120px;">
+                                    <label for="sleep_low_points">Sleep (No Pts) [s]</label>
+                                    <input type="number" id="sleep_low_points" name="sleep_low_points" min="1" value="900">
+                                </div>
+                                <div class="col" style="min-width: 120px;">
+                                    <label for="sleep_list_ended">Sleep (No Gifts) [s]</label>
+                                    <input type="number" id="sleep_list_ended" name="sleep_list_ended" min="1" value="120">
+                                </div>
+                            </div>
+                        </fieldset>
 
-                <button type="submit" class="btn submit" style="margin-top: 0;">Save Configuration</button>
-                <div id="saveMsg" class="success-msg hidden">Saved Successfully!</div>
-            </form>
+                        <button type="submit" class="btn submit" style="margin-top: 0;">Save Account</button>
+                    </form>
+                </div>
+            </div>
         </section>
 
-        <!-- WebUI Settings Tab -->
-        <section id="ui-settings" class="tab-pane">
+        <!-- Global Settings Tab -->
+        <section id="global-settings" class="tab-pane">
             <header>
-                <h1>WebUI Settings</h1>
-                <p>Customize how the dashboard looks and behaves.</p>
+                <h1>Global Settings</h1>
+                <p>Customize dashboard UI and global bot behavior.</p>
             </header>
-            <form id="uiConfigForm" class="glass-form">
+            <form id="globalConfigForm" class="glass-form">
                 <fieldset style="border: none; margin-bottom: 1.5rem;">
                     <legend style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color); margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">History Page Settings</legend>
                     <div class="form-group" style="margin-top: 15px;">
@@ -158,8 +163,15 @@
                         </div>
                     </div>
                 </fieldset>
-                <button type="submit" class="btn submit">Save UI Settings</button>
-                <div id="uiSaveMsg" class="success-msg hidden">Saved Successfully!</div>
+                <fieldset style="border: none; margin-bottom: 1.5rem;">
+                    <legend style="font-weight: 700; font-size: 1.1rem; color: #8b5cf6; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; width: 100%;">Startup Behavior</legend>
+                    <div style="display: flex; flex-direction: row; align-items: center; gap: 0.75rem; margin-top: 15px;">
+                        <input type="checkbox" id="auto_start" name="auto_start" style="width: 20px; height: 20px; accent-color: #8b5cf6; cursor: pointer; margin: 0;">
+                        <label for="auto_start" style="margin-bottom: 0; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">Auto-start bots on launch</label>
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn submit">Save Global Settings</button>
+                <div id="globalSaveMsg" class="success-msg hidden">Saved Successfully!</div>
             </form>
         </section>
 
@@ -240,6 +252,7 @@
                     <thead>
                         <tr>
                             <th>Date</th>
+                            <th>Account</th>
                             <th>Game Name</th>
                             <th>Cost</th>
                         </tr>

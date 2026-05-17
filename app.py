@@ -16,43 +16,69 @@ os.makedirs('data', exist_ok=True)
 CONFIG_FILE = 'data/config.json'
 HISTORY_FILE = 'data/history.json'
 
-bot_thread = None
-bot_instance = None
+bot_threads = {}
+bot_instances = {}
 
 def load_config():
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+            if 'accounts' not in data:
+                # Migrate old config
+                new_data = {
+                    "accounts": [],
+                    "global": {
+                        "date_format": data.get("date_format", "US"),
+                        "timezone": data.get("timezone", "UTC"),
+                        "discord_webhook": data.get("discord_webhook", ""),
+                        "telegram_token": data.get("telegram_token", ""),
+                        "telegram_chat_id": data.get("telegram_chat_id", ""),
+                        "n8n_webhook": data.get("n8n_webhook", ""),
+                        "auto_start": data.get("auto_start", False)
+                    }
+                }
+                if data.get("cookie"):
+                    new_data["accounts"].append({
+                        "id": "1",
+                        "name": "Main",
+                        "cookie": data.get("cookie", ""),
+                        "gift_type": data.get("gift_type", "All"),
+                        "pinned": data.get("pinned", False),
+                        "min_points": data.get("min_points", 10),
+                        "sleep_low_points": data.get("sleep_low_points", 900),
+                        "sleep_list_ended": data.get("sleep_list_ended", 120),
+                        "safety_check": data.get("safety_check", True)
+                    })
+                save_config(new_data)
+                return new_data
+            return data
     return {
-        "cookie": "",
-        "gift_type": "All",
-        "pinned": False,
-        "min_points": 10,
-        "sleep_low_points": 900,
-        "sleep_list_ended": 120,
-        "date_format": "US",
-        "timezone": "UTC",
-        "discord_webhook": "",
-        "telegram_token": "",
-        "telegram_chat_id": "",
-        "n8n_webhook": "",
-        "auto_start": False,
-        "safety_check": True
+        "accounts": [],
+        "global": {
+            "date_format": "US",
+            "timezone": "UTC",
+            "discord_webhook": "",
+            "telegram_token": "",
+            "telegram_chat_id": "",
+            "n8n_webhook": "",
+            "auto_start": False
+        }
     }
 
 def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f, indent=4)
 
-def run_bot(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url, safety_check):
-    global bot_instance
+def run_bot(account_id, account_name, cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url, safety_check):
+    global bot_instances
     try:
-        bot_instance = SteamGifts(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url, safety_check)
-        bot_instance.start()
+        bot_instances[account_id] = SteamGifts(cookie, gift_type, pinned, min_points, sleep_low_points, sleep_list_ended, webhook_url, safety_check, account_id, account_name)
+        bot_instances[account_id].start()
     except Exception as e:
-        log(f"Bot error: {str(e)}", "red")
+        log(f"Bot error ({account_name}): {str(e)}", "red")
     finally:
-        bot_instance = None
+        if account_id in bot_instances:
+            del bot_instances[account_id]
 
 @app.route('/')
 def index():
@@ -148,45 +174,69 @@ def clear_history():
         
 @app.route('/api/status', methods=['GET'])
 def get_status():
-    is_running = bot_thread is not None and bot_thread.is_alive()
-    points = bot_instance.points if bot_instance and hasattr(bot_instance, 'points') else 0
-    return jsonify({"running": is_running, "points": points})
+    status_data = {}
+    config = load_config()
+    for acc in config.get('accounts', []):
+        acc_id = acc['id']
+        is_running = acc_id in bot_threads and bot_threads[acc_id].is_alive()
+        points = bot_instances[acc_id].points if acc_id in bot_instances and hasattr(bot_instances[acc_id], 'points') else 0
+        status_data[acc_id] = {"running": is_running, "points": points}
+    return jsonify(status_data)
 
 @app.route('/api/start', methods=['POST'])
 def start_bot():
-    global bot_thread, bot_instance
-    if bot_thread is not None and bot_thread.is_alive():
+    global bot_threads, bot_instances
+    data = request.json
+    account_id = data.get('account_id')
+    
+    if not account_id:
+        return jsonify({"status": "error", "message": "No account_id provided"})
+
+    if account_id in bot_threads and bot_threads[account_id].is_alive():
         return jsonify({"status": "error", "message": "Bot is already running"})
     
     config = load_config()
-    if not config.get('cookie'):
-        return jsonify({"status": "error", "message": "No cookie (PHPSESSID) configured."})
+    account = next((a for a in config.get('accounts', []) if a['id'] == account_id), None)
+    
+    if not account:
+        return jsonify({"status": "error", "message": "Account not found"})
+        
+    if not account.get('cookie'):
+        return jsonify({"status": "error", "message": "No cookie (PHPSESSID) configured for this account."})
 
+    global_config = config.get('global', {})
     urls = []
-    if config.get("discord_webhook"):
-        urls.append(config.get("discord_webhook"))
-    if config.get("telegram_token") and config.get("telegram_chat_id"):
-        urls.append(f"tgram://{config.get('telegram_token')}/{config.get('telegram_chat_id')}")
-    if config.get("n8n_webhook"):
-        n8n = config.get("n8n_webhook")
+    if global_config.get("discord_webhook"):
+        urls.append(global_config.get("discord_webhook"))
+    if global_config.get("telegram_token") and global_config.get("telegram_chat_id"):
+        urls.append(f"tgram://{global_config.get('telegram_token')}/{global_config.get('telegram_chat_id')}")
+    if global_config.get("n8n_webhook"):
+        n8n = global_config.get("n8n_webhook")
         if n8n.startswith("http://"): n8n = "n8n://" + n8n[7:]
         elif n8n.startswith("https://"): n8n = "n8ns://" + n8n[8:]
         urls.append(n8n)
 
-    bot_thread = threading.Thread(
+    thread = threading.Thread(
         target=run_bot, 
-        args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), ','.join(urls), config.get('safety_check', True))
+        args=(account['id'], account['name'], account['cookie'], account['gift_type'], account['pinned'], account['min_points'], account.get('sleep_low_points', 900), account.get('sleep_list_ended', 120), ','.join(urls), account.get('safety_check', True))
     )
-    bot_thread.daemon = True
-    bot_thread.start()
+    thread.daemon = True
+    bot_threads[account_id] = thread
+    thread.start()
     
     return jsonify({"status": "success"})
 
 @app.route('/api/stop', methods=['POST'])
 def stop_bot():
-    global bot_instance
-    if bot_instance:
-        bot_instance.stop()
+    global bot_instances
+    data = request.json
+    account_id = data.get('account_id')
+    
+    if not account_id:
+        return jsonify({"status": "error", "message": "No account_id provided"})
+        
+    if account_id in bot_instances:
+        bot_instances[account_id].stop()
         return jsonify({"status": "success"})
     return jsonify({"status": "error", "message": "Bot is not running"})
 
@@ -215,27 +265,32 @@ def stream_logs():
 
 def auto_start_bot():
     """Check config and auto-start the bot if enabled."""
-    global bot_thread
+    global bot_threads
     config = load_config()
-    if config.get('auto_start') and config.get('cookie'):
-        log("Auto-start enabled. Starting bot...", "green")
+    global_config = config.get('global', {})
+    
+    if global_config.get('auto_start'):
         urls = []
-        if config.get("discord_webhook"):
-            urls.append(config.get("discord_webhook"))
-        if config.get("telegram_token") and config.get("telegram_chat_id"):
-            urls.append(f"tgram://{config.get('telegram_token')}/{config.get('telegram_chat_id')}")
-        if config.get("n8n_webhook"):
-            n8n = config.get("n8n_webhook")
+        if global_config.get("discord_webhook"):
+            urls.append(global_config.get("discord_webhook"))
+        if global_config.get("telegram_token") and global_config.get("telegram_chat_id"):
+            urls.append(f"tgram://{global_config.get('telegram_token')}/{global_config.get('telegram_chat_id')}")
+        if global_config.get("n8n_webhook"):
+            n8n = global_config.get("n8n_webhook")
             if n8n.startswith("http://"): n8n = "n8n://" + n8n[7:]
             elif n8n.startswith("https://"): n8n = "n8ns://" + n8n[8:]
             urls.append(n8n)
 
-        bot_thread = threading.Thread(
-            target=run_bot,
-            args=(config['cookie'], config['gift_type'], config['pinned'], config['min_points'], config.get('sleep_low_points', 900), config.get('sleep_list_ended', 120), ','.join(urls), config.get('safety_check', True))
-        )
-        bot_thread.daemon = True
-        bot_thread.start()
+        for account in config.get('accounts', []):
+            if account.get('cookie'):
+                log(f"Auto-start enabled. Starting bot for {account['name']}...", "green")
+                thread = threading.Thread(
+                    target=run_bot,
+                    args=(account['id'], account['name'], account['cookie'], account['gift_type'], account['pinned'], account['min_points'], account.get('sleep_low_points', 900), account.get('sleep_list_ended', 120), ','.join(urls), account.get('safety_check', True))
+                )
+                thread.daemon = True
+                bot_threads[account['id']] = thread
+                thread.start()
 
 if __name__ == '__main__':
     auto_start_bot()

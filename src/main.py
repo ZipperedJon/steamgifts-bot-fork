@@ -22,7 +22,9 @@ FORBIDDEN_WORDS = (" ban", " fake", " bot", " not enter", " don't enter", " do n
 GOOD_WORDS = (" bank", " banan", " both", " band", " banner", " bang")
 
 class SteamGifts:
-    def __init__(self, cookie, gifts_type, pinned, min_points, sleep_low_points=900, sleep_list_ended=120, webhook_url="", safety_check=True):
+    def __init__(self, cookie, gifts_type, pinned, min_points, sleep_low_points=900, sleep_list_ended=120, webhook_url="", safety_check=True, account_id="1", account_name="Main"):
+        self.account_id = account_id
+        self.account_name = account_name
         self.cookie = {
             'PHPSESSID': cookie
         }
@@ -51,6 +53,9 @@ class SteamGifts:
         self.history_file = "data/history.json"
         
         self.webhook_urls = [u.strip() for u in webhook_url.split(',')] if webhook_url else []
+
+    def _log(self, message, color="white"):
+        log(f"[{self.account_name}] {message}", color)
 
     def requests_retry_session(
         self,
@@ -82,9 +87,9 @@ class SteamGifts:
             self.xsrf_token = soup.find('input', {'name': 'xsrf_token'})['value']
             self.points = int(soup.find('span', {'class': 'nav__points'}).text)  # storage points
         except TypeError:
-            log("⛔  Cookie is not valid (or Cloudflare verification blocked us). Check logs or update PHPSESSID.", "red")
+            self._log("⛔  Cookie is not valid (or Cloudflare verification blocked us). Check logs or update PHPSESSID.", "red")
             if soup.title:
-                log(f"Page title was: {soup.title.text.strip()}", "red")
+                self._log(f"Page title was: {soup.title.text.strip()}", "red")
             self.running = False
 
     def sleep_with_check(self, seconds):
@@ -110,7 +115,8 @@ class SteamGifts:
             "cost": game_cost,
             "link": game_link,
             "image": image_url,
-            "date": datetime.now().astimezone().isoformat()
+            "date": datetime.now().astimezone().isoformat(),
+            "account_name": self.account_name
         })
 
         with open(self.history_file, 'w', encoding='utf-8') as f:
@@ -166,13 +172,13 @@ class SteamGifts:
                 else: 
                     requests.post(url.replace('json://', 'http://').replace('jsons://', 'https://'), json=payload)
             except Exception as e:
-                log(f"Dispatch error for {url}: {str(e)}", "red")
+                self._log(f"Dispatch error for {url}: {str(e)}", "red")
 
     def get_game_content(self, page=1):
         n = page
         while self.running:
             txt = "⚙️  Retrieving games from %d page." % n
-            log(txt, "magenta")
+            self._log(txt, "magenta")
 
             filtered_url = self.filter_url[self.gifts_type] % n
             paginated_url = f"{self.base}/giveaways/{filtered_url}"
@@ -183,7 +189,7 @@ class SteamGifts:
 
             if not len(game_list):
                 if n == 1:
-                    log("⛔  Page is empty. Please, select another type.", "red")
+                    self._log("⛔  Page is empty. Please, select another type.", "red")
                     self.running = False
                 break
 
@@ -197,7 +203,7 @@ class SteamGifts:
 
                 if self.points == 0 or self.points < self.min_points:
                     txt = f"🛋️  Sleeping due to low points! We have {self.points} points, but we need {self.min_points} to start."
-                    log(txt, "yellow")
+                    self._log(txt, "yellow")
                     self.sleep_with_check(self.sleep_low_points)
                     if not self.running:
                         return False
@@ -215,7 +221,7 @@ class SteamGifts:
 
                 if self.points - int(game_cost) < 0:
                     txt = f"⛔ Not enough points to enter: {game_name}"
-                    log(txt, "red")
+                    self._log(txt, "red")
                     continue
 
                 elif self.points - int(game_cost) >= 0:
@@ -233,22 +239,22 @@ class SteamGifts:
                     if self.safety_check:
                         is_safe, safety_score, details = self.check_giveaway_safety(game_link)
                         if not is_safe:
-                            log(f"🛡️ SKIPPED (unsafe): {game_name} — score {safety_score}, found: {', '.join(details)}", "red")
+                            self._log(f"🛡️ SKIPPED (unsafe): {game_name} — score {safety_score}, found: {', '.join(details)}", "red")
                             continue
                         elif safety_score < 100:
-                            log(f"🛡️ Borderline: {game_name} — score {safety_score}, found: {', '.join(details)}", "yellow")
+                            self._log(f"🛡️ Borderline: {game_name} — score {safety_score}, found: {', '.join(details)}", "yellow")
 
                     res = self.entry_gift(game_id)
                     if res:
                         self.points -= int(game_cost)
                         txt = f"🎉 One more game! Has just entered {game_name}"
-                        log(txt, "green")
+                        self._log(txt, "green")
                         self.record_history(game_name, int(game_cost), game_link, image_url)
                         
                         try:
                             self.dispatch_webhooks(game_name, game_cost, game_link, image_url)
                         except Exception as e:
-                            log(f"Webhook error: {str(e)}", "red")
+                            self._log(f"Webhook error: {str(e)}", "red")
 
                         self.sleep_with_check(randint(3, 7))
 
@@ -284,7 +290,7 @@ class SteamGifts:
             r = self.requests_retry_session().get(giveaway_url, cookies=self.cookie)
             text_lower = r.text.lower()
         except Exception as e:
-            log(f"🛡️ Safety check failed for {giveaway_url}: {str(e)}", "yellow")
+            self._log(f"🛡️ Safety check failed for {giveaway_url}: {str(e)}", "yellow")
             # If we can't fetch the page, assume safe to avoid blocking everything
             return (True, 100, [])
 
@@ -327,7 +333,7 @@ class SteamGifts:
 
             if self.points > 0:
                 txt = "🤖 Hoho! I am back! You have %d points. Lets hack." % self.points
-                log(txt, "blue")
+                self._log(txt, "blue")
 
             low_points = self.get_game_content()
 
@@ -335,9 +341,9 @@ class SteamGifts:
                 break
 
             if not low_points:
-                log(f"🛋️  List of games is ended. Waiting {self.sleep_list_ended} seconds to update...", "yellow")
+                self._log(f"🛋️  List of games is ended. Waiting {self.sleep_list_ended} seconds to update...", "yellow")
                 self.sleep_with_check(self.sleep_list_ended)
 
     def stop(self):
         self.running = False
-        log("⛔ Bot stopping gracefully...", "red")
+        self._log("⛔ Bot stopping gracefully...", "red")
