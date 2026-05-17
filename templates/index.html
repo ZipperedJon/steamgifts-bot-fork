@@ -67,9 +67,9 @@
             <!-- Account Modal -->
             <div id="accountModal" class="modal hidden">
                 <div class="modal-content">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h2 id="modalTitle">Edit Account</h2>
-                        <button id="closeModalBtn" class="btn" style="padding: 5px 10px; background: transparent; border: none; color: white;">✕</button>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">
+                        <h2 id="modalTitle" style="margin: 0; font-size: 1.8rem; font-weight: 700; color: white;">Edit Account</h2>
+                        <button type="button" id="closeModalBtn" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 0.5rem; color: #ef4444; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 1.2rem; margin-left: 1rem; flex-shrink: 0;">✕</button>
                     </div>
                     <form id="accountForm">
                         <input type="hidden" id="account_id" name="account_id">
