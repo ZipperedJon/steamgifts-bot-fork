@@ -33,8 +33,7 @@ def load_config():
                         "discord_webhook": data.get("discord_webhook", ""),
                         "telegram_token": data.get("telegram_token", ""),
                         "telegram_chat_id": data.get("telegram_chat_id", ""),
-                        "n8n_webhook": data.get("n8n_webhook", ""),
-                        "auto_start": data.get("auto_start", False)
+                        "n8n_webhook": data.get("n8n_webhook", "")
                     }
                 }
                 if data.get("cookie"):
@@ -47,7 +46,8 @@ def load_config():
                         "min_points": data.get("min_points", 10),
                         "sleep_low_points": data.get("sleep_low_points", 900),
                         "sleep_list_ended": data.get("sleep_list_ended", 120),
-                        "safety_check": data.get("safety_check", True)
+                        "safety_check": data.get("safety_check", True),
+                        "auto_start": data.get("auto_start", False)
                     })
                 save_config(new_data)
                 return new_data
@@ -60,8 +60,7 @@ def load_config():
             "discord_webhook": "",
             "telegram_token": "",
             "telegram_chat_id": "",
-            "n8n_webhook": "",
-            "auto_start": False
+            "n8n_webhook": ""
         }
     }
 
@@ -310,28 +309,27 @@ def auto_start_bot():
     config = load_config()
     global_config = config.get('global', {})
     
-    if global_config.get('auto_start'):
-        urls = []
-        if global_config.get("discord_webhook"):
-            urls.append(global_config.get("discord_webhook"))
-        if global_config.get("telegram_token") and global_config.get("telegram_chat_id"):
-            urls.append(f"tgram://{global_config.get('telegram_token')}/{global_config.get('telegram_chat_id')}")
-        if global_config.get("n8n_webhook"):
-            n8n = global_config.get("n8n_webhook")
-            if n8n.startswith("http://"): n8n = "n8n://" + n8n[7:]
-            elif n8n.startswith("https://"): n8n = "n8ns://" + n8n[8:]
-            urls.append(n8n)
+    urls = []
+    if global_config.get("discord_webhook"):
+        urls.append(global_config.get("discord_webhook"))
+    if global_config.get("telegram_token") and global_config.get("telegram_chat_id"):
+        urls.append(f"tgram://{global_config.get('telegram_token')}/{global_config.get('telegram_chat_id')}")
+    if global_config.get("n8n_webhook"):
+        n8n = global_config.get("n8n_webhook")
+        if n8n.startswith("http://"): n8n = "n8n://" + n8n[7:]
+        elif n8n.startswith("https://"): n8n = "n8ns://" + n8n[8:]
+        urls.append(n8n)
 
-        for account in config.get('accounts', []):
-            if account.get('cookie'):
-                log(f"Auto-start enabled. Starting bot for {account['name']}...", "green")
-                thread = threading.Thread(
-                    target=run_bot,
-                    args=(account['id'], account['name'], account['cookie'], account['gift_type'], account['pinned'], account['min_points'], account.get('sleep_low_points', 900), account.get('sleep_list_ended', 120), ','.join(urls), account.get('safety_check', True))
-                )
-                thread.daemon = True
-                bot_threads[account['id']] = thread
-                thread.start()
+    for account in config.get('accounts', []):
+        if account.get('cookie') and account.get('auto_start'):
+            log(f"Auto-start enabled. Starting bot for {account['name']}...", "green")
+            thread = threading.Thread(
+                target=run_bot,
+                args=(account['id'], account['name'], account['cookie'], account['gift_type'], account['pinned'], account['min_points'], account.get('sleep_low_points', 900), account.get('sleep_list_ended', 120), ','.join(urls), account.get('safety_check', True))
+            )
+            thread.daemon = True
+            bot_threads[account['id']] = thread
+            thread.start()
 
 if __name__ == '__main__':
     auto_start_bot()

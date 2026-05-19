@@ -141,10 +141,12 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('sleep_list_ended').value = acc.sleep_list_ended || 120;
             document.getElementById('pinned').checked = acc.pinned || false;
             document.getElementById('safety_check').checked = acc.safety_check !== undefined ? acc.safety_check : true;
+            document.getElementById('account_auto_start').checked = acc.auto_start || false;
         } else {
             document.getElementById('modalTitle').textContent = 'Add Account';
             document.getElementById('account_id').value = '';
             document.getElementById('safety_check').checked = true;
+            document.getElementById('account_auto_start').checked = false;
         }
     }
 
@@ -177,7 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 sleep_low_points: parseInt(document.getElementById('sleep_low_points').value) || 900,
                 sleep_list_ended: parseInt(document.getElementById('sleep_list_ended').value) || 120,
                 pinned: document.getElementById('pinned').checked,
-                safety_check: document.getElementById('safety_check').checked
+                safety_check: document.getElementById('safety_check').checked,
+                auto_start: document.getElementById('account_auto_start').checked
             };
             
             const existingIdx = currentConfig.accounts.findIndex(a => a.id === id);
@@ -219,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(g.telegram_token) { const e = document.getElementById('telegram_token'); if(e) e.value = g.telegram_token; }
                 if(g.telegram_chat_id) { const e = document.getElementById('telegram_chat_id'); if(e) e.value = g.telegram_chat_id; }
                 if(g.n8n_webhook) { const e = document.getElementById('n8n_webhook'); if(e) e.value = g.n8n_webhook; }
-                if(g.auto_start !== undefined) { const e = document.getElementById('auto_start'); if(e) e.checked = g.auto_start; }
 
                 renderAccounts();
             });
@@ -249,7 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
             ...currentConfig.global,
             date_format: document.getElementById('date_format') ? document.getElementById('date_format').value : 'US',
             timezone: document.getElementById('timezone') ? document.getElementById('timezone').value : 'UTC',
-            auto_start: document.getElementById('auto_start') ? document.getElementById('auto_start').checked : false,
             discord_webhook: document.getElementById('discord_webhook') ? document.getElementById('discord_webhook').value : '',
             telegram_token: document.getElementById('telegram_token') ? document.getElementById('telegram_token').value : '',
             telegram_chat_id: document.getElementById('telegram_chat_id') ? document.getElementById('telegram_chat_id').value : '',

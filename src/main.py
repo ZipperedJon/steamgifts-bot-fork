@@ -81,9 +81,7 @@ class SteamGifts:
         return soup
 
     def update_info(self):
-        max_retries = 3
-        
-        for attempt in range(max_retries):
+        while self.running:
             soup = self.get_soup_from_page(self.base)
 
             try:
@@ -91,14 +89,10 @@ class SteamGifts:
                 self.points = int(soup.find('span', {'class': 'nav__points'}).text)  # storage points
                 return # Success, exit retry loop
             except TypeError:
-                if attempt < max_retries - 1:
-                    self._log(f"⚠️ Failed to get info (attempt {attempt + 1}/{max_retries}). Retrying in 10 seconds...", "yellow")
-                    self.sleep_with_check(10)
-                else:
-                    self._log("⛔  Cookie is not valid (or Cloudflare verification blocked us). Check logs or update PHPSESSID.", "red")
-                    if soup.title:
-                        self._log(f"Page title was: {soup.title.text.strip()}", "red")
-                    self.running = False
+                self._log("⚠️ Cloudflare block or invalid cookie detected. Retrying in 10 minutes...", "yellow")
+                if soup.title:
+                    self._log(f"Page title was: {soup.title.text.strip()}", "yellow")
+                self.sleep_with_check(600)
 
     def sleep_with_check(self, seconds):
         if not self.running:
