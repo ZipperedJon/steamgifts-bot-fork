@@ -136,7 +136,7 @@ class SteamGifts:
             "tts": False,
             "embeds": [
                 {
-                    "description": f"Cost: **{game_cost} P**",
+                    "description": f"Cost: **{game_cost} P**\nAccount: **{self.account_name}**",
                     "fields": [],
                     "author": {
                         "name": "Steam Gifts Bot",
@@ -165,7 +165,7 @@ class SteamGifts:
                     parts = url.split('/')
                     token = parts[2]
                     chat_id = parts[3]
-                    txt = f"🎉 Successfully entered **{game_name}** ({game_cost} P)\n{game_link}"
+                    txt = f"🎉 Successfully entered **{game_name}** ({game_cost} P) on account **{self.account_name}**\n{game_link}"
                     requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={"chat_id": chat_id, "text": txt, "parse_mode": "Markdown"})
                 elif url.startswith('discord://'):
                     pass # Handled below
@@ -174,6 +174,7 @@ class SteamGifts:
                     requests.post(pure_url, json={
                         "Game Name": game_name,
                         "Points used": int(game_cost),
+                        "Account Name": self.account_name,
                         "Thumbnail URL": image_url,
                         "Link to giveaway URL": game_link
                     })

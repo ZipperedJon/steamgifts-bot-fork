@@ -117,7 +117,7 @@ def test_notification():
         "tts": False,
         "embeds": [
             {
-                "description": "Cost: **10 P**",
+                "description": "Cost: **10 P**\nAccount: **Test Account**",
                 "fields": [],
                 "author": {
                     "name": "Steam Gifts Bot",
@@ -146,13 +146,14 @@ def test_notification():
                 parts = url.split('/')
                 token = parts[2]
                 chat_id = parts[3]
-                txt = f"🎉 Successfully entered **TEST GAME NAME** (10 P)\nhttps://steamgifts.com/"
+                txt = f"🎉 Successfully entered **TEST GAME NAME** (10 P) on account **Test Account**\nhttps://steamgifts.com/"
                 requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={"chat_id": chat_id, "text": txt, "parse_mode": "Markdown"})
             elif url.startswith('n8n://') or url.startswith('n8ns://'):
                 pure_url = url.replace('n8n://', 'http://').replace('n8ns://', 'https://')
                 requests.post(pure_url, json={
                     "Game Name": "TEST GAME NAME",
                     "Points used": 10,
+                    "Account Name": "Test Account",
                     "Thumbnail URL": image_url,
                     "Link to giveaway URL": "https://steamgifts.com/"
                 })
