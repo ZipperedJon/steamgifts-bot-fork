@@ -153,6 +153,18 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('closeModalBtn').addEventListener('click', () => accountModal.classList.add('hidden'));
         document.getElementById('addAccountBtn').addEventListener('click', () => openModal(null));
         
+        const startAllBtn = document.getElementById('startAllBtn');
+        if (startAllBtn) {
+            startAllBtn.addEventListener('click', () => {
+                fetch('/api/start_all', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                    .then(r => r.json()).then(res => { 
+                        if (res.status !== 'success') alert(res.message); 
+                        else if (res.started > 0) checkStatus();
+                        else alert('No new bots were started. Either none exist, they are all missing cookies, or all are already running.');
+                    });
+            });
+        }
+        
         document.getElementById('accountForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const id = document.getElementById('account_id').value || Date.now().toString();

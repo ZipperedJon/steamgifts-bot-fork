@@ -4,6 +4,7 @@
 > This is a modernized, Dockerized fork of the original [stilManiac/steamgifts-bot](https://github.com/stilManiac/steamgifts-bot). All original bot features remain, but with added backend architecture, multi-node webhook support, and a seamlessly animated graphical User Interface!
 
 ### Features
+- **Multi-Account Support**: Manage, configure, and concurrently run multiple SteamGifts accounts from a single dashboard.
 - Modern, dynamic Web UI with animated, glassmorphic aesthetics.
 - Real-time logging console via Server-Sent Events.
 - Live point tracker and automated giveaway entry configurations.

@@ -240,6 +240,46 @@ def stop_bot():
         return jsonify({"status": "success"})
     return jsonify({"status": "error", "message": "Bot is not running"})
 
+@app.route('/api/start_all', methods=['POST'])
+def start_all_bots():
+    global bot_threads, bot_instances
+    
+    config = load_config()
+    accounts = config.get('accounts', [])
+    if not accounts:
+        return jsonify({"status": "error", "message": "No accounts configured"})
+        
+    global_config = config.get('global', {})
+    urls = []
+    if global_config.get("discord_webhook"):
+        urls.append(global_config.get("discord_webhook"))
+    if global_config.get("telegram_token") and global_config.get("telegram_chat_id"):
+        urls.append(f"tgram://{global_config.get('telegram_token')}/{global_config.get('telegram_chat_id')}")
+    if global_config.get("n8n_webhook"):
+        n8n = global_config.get("n8n_webhook")
+        if n8n.startswith("http://"): n8n = "n8n://" + n8n[7:]
+        elif n8n.startswith("https://"): n8n = "n8ns://" + n8n[8:]
+        urls.append(n8n)
+        
+    started = 0
+    for account in accounts:
+        account_id = account['id']
+        if not account.get('cookie'):
+            continue
+        if account_id in bot_threads and bot_threads[account_id].is_alive():
+            continue
+            
+        thread = threading.Thread(
+            target=run_bot, 
+            args=(account['id'], account['name'], account['cookie'], account['gift_type'], account['pinned'], account['min_points'], account.get('sleep_low_points', 900), account.get('sleep_list_ended', 120), ','.join(urls), account.get('safety_check', True))
+        )
+        thread.daemon = True
+        bot_threads[account_id] = thread
+        thread.start()
+        started += 1
+        
+    return jsonify({"status": "success", "started": started})
+
 @app.route('/api/history', methods=['GET'])
 def get_history():
     if os.path.exists(HISTORY_FILE):

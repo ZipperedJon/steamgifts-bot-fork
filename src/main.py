@@ -81,16 +81,24 @@ class SteamGifts:
         return soup
 
     def update_info(self):
-        soup = self.get_soup_from_page(self.base)
+        max_retries = 3
+        
+        for attempt in range(max_retries):
+            soup = self.get_soup_from_page(self.base)
 
-        try:
-            self.xsrf_token = soup.find('input', {'name': 'xsrf_token'})['value']
-            self.points = int(soup.find('span', {'class': 'nav__points'}).text)  # storage points
-        except TypeError:
-            self._log("⛔  Cookie is not valid (or Cloudflare verification blocked us). Check logs or update PHPSESSID.", "red")
-            if soup.title:
-                self._log(f"Page title was: {soup.title.text.strip()}", "red")
-            self.running = False
+            try:
+                self.xsrf_token = soup.find('input', {'name': 'xsrf_token'})['value']
+                self.points = int(soup.find('span', {'class': 'nav__points'}).text)  # storage points
+                return # Success, exit retry loop
+            except TypeError:
+                if attempt < max_retries - 1:
+                    self._log(f"⚠️ Failed to get info (attempt {attempt + 1}/{max_retries}). Retrying in 10 seconds...", "yellow")
+                    self.sleep_with_check(10)
+                else:
+                    self._log("⛔  Cookie is not valid (or Cloudflare verification blocked us). Check logs or update PHPSESSID.", "red")
+                    if soup.title:
+                        self._log(f"Page title was: {soup.title.text.strip()}", "red")
+                    self.running = False
 
     def sleep_with_check(self, seconds):
         if not self.running:

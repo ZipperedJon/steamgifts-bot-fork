@@ -58,7 +58,10 @@
                     <h1>Bot Accounts</h1>
                     <p>Manage multiple accounts and their behaviors.</p>
                 </div>
-                <button id="addAccountBtn" class="btn primary">Add Account</button>
+                <div style="display: flex; gap: 10px;">
+                    <button id="startAllBtn" class="btn success" style="background: #10b981; color: white; border: none;">Start All</button>
+                    <button id="addAccountBtn" class="btn primary">Add Account</button>
+                </div>
             </header>
             <div id="accountsList" class="accounts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
                 <!-- Account cards go here -->
