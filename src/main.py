@@ -76,21 +76,30 @@ class SteamGifts:
         return session
 
     def get_soup_from_page(self, url):
-        r = self.requests_retry_session().get(url, cookies=self.cookie)
-        soup = BeautifulSoup(r.text, 'html.parser')
-        return soup
+        try:
+            r = self.requests_retry_session().get(url, cookies=self.cookie, timeout=15)
+            soup = BeautifulSoup(r.text, 'html.parser')
+            return soup
+        except Exception as e:
+            self._log(f"⚠️ Network error while fetching {url}: {str(e)}", "red")
+            return None
 
     def update_info(self):
         while self.running:
             soup = self.get_soup_from_page(self.base)
 
+            if soup is None:
+                self._log("⚠️ Could not load SteamGifts. Retrying in 5 minutes...", "yellow")
+                self.sleep_with_check(300)
+                continue
+
             try:
                 self.xsrf_token = soup.find('input', {'name': 'xsrf_token'})['value']
                 self.points = int(soup.find('span', {'class': 'nav__points'}).text)  # storage points
                 return # Success, exit retry loop
-            except TypeError:
-                self._log("⚠️ Cloudflare block or invalid cookie detected. Retrying in 10 minutes...", "yellow")
-                if soup.title:
+            except Exception as e:
+                self._log("⚠️ Cloudflare block, invalid cookie, or parsing error detected. Retrying in 10 minutes...", "yellow")
+                if soup and soup.title:
                     self._log(f"Page title was: {soup.title.text.strip()}", "yellow")
                 self.sleep_with_check(600)
 
@@ -188,12 +197,15 @@ class SteamGifts:
 
             soup = self.get_soup_from_page(paginated_url)
 
+            if soup is None:
+                self._log("⚠️ Failed to load giveaways. Retrying later...", "yellow")
+                return False
+
             game_list = soup.find_all('div', {'class': 'giveaway__row-inner-wrap'})
 
             if not len(game_list):
                 if n == 1:
-                    self._log("⛔  Page is empty. Please, select another type.", "red")
-                    self.running = False
+                    self._log("⛔  Page is empty. Will sleep and try again.", "yellow")
                 break
 
             low_points = False
@@ -270,13 +282,13 @@ class SteamGifts:
 
     def entry_gift(self, game_id):
         payload = {'xsrf_token': self.xsrf_token, 'do': 'entry_insert', 'code': game_id}
-        entry = self.requests_retry_session().post('https://www.steamgifts.com/ajax.php', data=payload, cookies=self.cookie)
         try:
+            entry = self.requests_retry_session().post('https://www.steamgifts.com/ajax.php', data=payload, cookies=self.cookie, timeout=15)
             json_data = json.loads(entry.text)
             if json_data['type'] == 'success':
                 return True
-        except:
-            pass
+        except Exception as e:
+            self._log(f"⚠️ Error entering giveaway: {str(e)}", "red")
         return False
 
     def check_giveaway_safety(self, giveaway_url):
